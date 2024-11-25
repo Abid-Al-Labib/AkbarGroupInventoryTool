@@ -5,14 +5,14 @@ import { fetchOrderedPartsByOrderID, updateApprovedBudgetByID, updateApprovedOff
 import toast from "react-hot-toast";
 import { Flag, FlagOff, Loader2 } from "lucide-react";
 import OrderedPartRow from "./OrderedPartRow";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { isChangeStatusAllowed, isRevertStatusAllowed } from "@/services/helper";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { deleteOrderByID, fetchRunningOrdersByMachineId, UpdateStatusByID } from "@/services/OrdersService";
 import { InsertStatusTracker } from "@/services/StatusTrackerService";
 import { useNavigate } from 'react-router-dom';
-import { showAllBudgetApproveButton, showBudgetApproveButton, showOfficeOrderApproveButton, showPendingOrderApproveButton } from "@/services/ButtonVisibilityHelper";
+import { showAllBudgetApproveButton, showOfficeOrderApproveButton, showPendingOrderApproveButton } from "@/services/ButtonVisibilityHelper";
 import { useAuth } from "@/context/AuthContext";
 import { supabase_client } from "@/services/SupabaseClient";
 import { updateMachinePartQty } from "@/services/MachinePartsService";
@@ -210,7 +210,6 @@ const manageOrderStatus = async () => {
   const updatedOrderedParts = await loadOrderedParts()
   if (mode === "manage" && updatedOrderedParts)
   {
-    console.log("managing:",updatedOrderedParts)
     const next_status_id = isChangeStatusAllowed(updatedOrderedParts,current_status.name)
     setShowRevertButton(isRevertStatusAllowed(updatedOrderedParts,current_status.name))
     
@@ -278,7 +277,6 @@ const handleOrderManagement = async () => {
 }, [runCount, isProcessing]);
 
   const handleChanges = async (payload: any) => {
-    console.log("handling changes:",isProcessing)
     if (!isProcessing) {
     setRunCount(prevCount => prevCount + 1);
   }

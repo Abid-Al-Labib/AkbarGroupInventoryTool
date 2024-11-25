@@ -30,7 +30,7 @@ const OrderPage = () => {
     const profile = useAuth().profile
 
     const handleApplyFilters = (newFilters: any, summary: string) => { // Receive the summary
-        console.log('Applied Filters:', newFilters);
+        // console.log('Applied Filters:', newFilters);
         setFilters(newFilters);
         setFilterSummary(summary); // Store the filter summary
         setCurrentPage(1); // Reset page to 1 when filters are applied
@@ -69,7 +69,7 @@ const OrderPage = () => {
     };
 
     const handleResetFilters = () => {
-        console.log("Resseting filters by the function")
+        // console.log("Resseting filters by the function")
         setCurrentPage(1);
         setFilters({});
         fetchOrdersforPage({}); 

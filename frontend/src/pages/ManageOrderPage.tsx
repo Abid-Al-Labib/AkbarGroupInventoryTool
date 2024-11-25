@@ -20,7 +20,6 @@ const ManageOrderPage = () => {
   const navigate = useNavigate();
   const profile = useAuth().profile
   const [isManageOrderAuthorizedDialogOpen, setIsManageOrderAuthorizedDialogOpen] = useState<boolean>(false)
-  const [isOrderCompleteDialogOpen, setIsOrderCompleteDialogOpen] = useState<boolean>(false)
   const handleNavigationToOrderPage = () => {
     navigate("/orders");
   }
@@ -38,7 +37,6 @@ const ManageOrderPage = () => {
     const order_id = parseInt(id);
     try {
       const data = await fetchOrderByID(order_id);
-      console.log(data)
       if (data) {
         const order = data
         setOrder(order);

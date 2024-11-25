@@ -61,7 +61,6 @@ const ManagementPage = () => {
     if (machineToDelete) {
       try {
         if (await deleteMachine(machineToDelete.id)) {
-          toast.success("Machine deleted successfully");
           const updatedMachines = await fetchAllMachines(selectedFactorySection?.id);
           setMachines(updatedMachines.data);
         }

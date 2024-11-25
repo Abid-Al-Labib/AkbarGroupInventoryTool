@@ -1,7 +1,7 @@
 // AllMachinesStatus.tsx
 import { useEffect, useState } from "react";
 import { fetchFactories, fetchAllFactorySections } from "@/services/FactoriesService";
-import { fetchEnrichedMachines, fetchMachines } from "@/services/MachineServices";
+import { fetchEnrichedMachines } from "@/services/MachineServices";
 import { Loader2 } from "lucide-react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,5 +1,5 @@
 // MachinePartsTable.tsx
-import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '../ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import SearchAndFilter from "@/components/customui/SearchAndFilter";
 import MachinePartsRow from './MachinePartsRow'; // Import the MachinePartsRow component

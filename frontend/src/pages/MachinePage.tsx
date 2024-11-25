@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { fetchFactories, fetchFactorySections } from "@/services/FactoriesService";
 import { fetchMachineParts } from "@/services/MachinePartsService";
-import { fetchMachines, fetchMachineById, setMachineIsRunningById, fetchAllMachines } from "@/services/MachineServices";
+import { fetchMachineById, setMachineIsRunningById, fetchAllMachines } from "@/services/MachineServices";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 import MachinePartsTable from "@/components/customui/MachinePartsTable";
@@ -15,7 +15,7 @@ import { Machine, Order } from "@/types";
 import MachineStatus from "@/components/customui/MachineStatus";
 import { fetchRunningOrdersByMachineId } from "@/services/OrdersService";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AllMachinesStatus from "@/components/customui/AllMachineStatus";
 
@@ -178,9 +178,6 @@ const MachinePartsPage = () => {
     setMachineParts([]);
     setRunningOrders([]);
 
-    console.log("Selected Factory:", factoryId);
-    console.log("Selected Factory Section:", factorySectionId);
-    console.log("Selected Machine:", machineId);
   };
 
   const handleSelectMachine = async (value: string) => {
@@ -191,20 +188,17 @@ const MachinePartsPage = () => {
     setMachineParts([]);
     setRunningOrders([]); // Reset running orders when selecting a new machine
 
-    console.log("inHandleMachine");
-    console.log(machineId);
+
 
     if (machineId) {
       refreshComponents(); // Call refreshComponents after setting the machine ID
       try {
         const runningOrdersData = await fetchRunningOrdersByMachineId(machineId);
-        console.log("runningorder on");
-        console.log(machineId);
+
         setRunningOrders(runningOrdersData); // Set running orders
 
 
         if (runningOrdersData.length === 0) {
-          // console.log("in running orders check");
           await setMachineIsRunningById(machineId, true);
         }
 

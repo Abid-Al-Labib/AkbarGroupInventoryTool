@@ -8,12 +8,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { CirclePlus, CircleX, Loader2, CircleCheck, X } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import ReactSelect from 'react-select'
-import { fetchOrderByReqNum, fetchOrderByReqNumandFactory, insertOrder, insertOrderStorage } from "@/services/OrdersService";
+import { fetchOrderByReqNumandFactory, insertOrder, insertOrderStorage } from "@/services/OrdersService";
 
 import toast from 'react-hot-toast'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { fetchFactories, fetchFactorySections, fetchDepartments } from '@/services/FactoriesService';
-import { fetchAllMachines, fetchMachines, setMachineIsRunningById } from "@/services/MachineServices"
+import { fetchAllMachines, setMachineIsRunningById } from "@/services/MachineServices"
 import { insertOrderedParts } from '@/services/OrderedPartsService';
 import { fetchAllParts } from "@/services/PartsService"
 import { Part } from "@/types"
@@ -238,7 +238,6 @@ const CreateOrderPage = () => {
 
         const storage_data = await fetchStoragePartQuantityByFactoryID(partId, selectedFactoryId)
 
-        console.log(storage_data)
         if (orderType === "Machine" && storage_data.length > 0 && storage_data[0].qty > 0) {
 
             const newOrderedPart: InputOrderedPart = {
@@ -284,9 +283,7 @@ const CreateOrderPage = () => {
 
     const handleFinalCreateOrder = async () => {
 
-        console.log("Factory Section in final create order ", selectedFactorySectionId);
 
-        console.log("Machine in final create order ", selectedMachineId);
 
         setIsSubmitting(true);
         try {

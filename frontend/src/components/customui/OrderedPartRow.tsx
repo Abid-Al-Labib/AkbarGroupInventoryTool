@@ -77,7 +77,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   // useEffect to fetch most recent cost and purchase date
   useEffect(() => {
       const fetchData = async () => {
-        console.log(orderedPartInfo)
           if (mode=="manage")
           {
             const disableRow = orderedPartInfo.in_storage && orderedPartInfo.approved_storage_withdrawal && orderedPartInfo.qty===0
@@ -117,7 +116,7 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   }, [machine_id, orderedPartInfo.part_id]);
 
   const handleApproveFactory = () => {
-    console.log("Factory Approve action triggered");
+    // console.log("Factory Approve action triggered");
     const approvePartFromFactory = async() => {
       try {
         await updateApprovedPendingOrderByID(orderedPartInfo.id,true)
@@ -146,7 +145,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   }
 
   const handleApproveTakingFromStorage = () => {
-    console.log(`Headoffice approves taking ${orderedPartInfo.qty} from storage`)
     const takeFromStorage = async() => {
       try {
         if (currentStorageQty)
@@ -156,17 +154,11 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
               const new_storage_quantity = currentStorageQty - orderedPartInfo.qty
               await upsertStoragePart(orderedPartInfo.part_id,factory_id,new_storage_quantity)
               setCurrentStorageQty(new_storage_quantity)
-              console.log("updated storage qty")
               await updateOrderedPartQtyByID(orderedPartInfo.id,0)
-              console.log("updated ordered part qty")
               await updateMachinePartQty(machine_id, orderedPartInfo.part_id, orderedPartInfo.qty, 'add');
-              console.log("updated machine part qty")
               await updateSentDateByID(orderedPartInfo.id, new Date())
-              console.log("updated sent date")
               await updateReceivedByFactoryDateByID(orderedPartInfo.id,new Date())
-              console.log("updated received date")
               
-              console.log("updated qty_taken_from_storage")
               setDisableTakeStorageRow(true)
             }
             else{
@@ -174,11 +166,8 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
               const new_orderedpart_qty = orderedPartInfo.qty - currentStorageQty
               await upsertStoragePart(orderedPartInfo.part_id,factory_id,0)
               setCurrentStorageQty(0)
-              console.log("updated storage qty")
               await updateOrderedPartQtyByID(orderedPartInfo.id,new_orderedpart_qty)
-              console.log("updated ordered part qty")
               await updateMachinePartQty(machine_id,orderedPartInfo.part_id,currentStorageQty,'add')
-              console.log("updated machine part qty")
             }
             let takingFromStorageQty
             if(currentStorageQty <= orderedPartInfo.qty){
@@ -190,7 +179,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
             await updateQtyTakenFromStorage(orderedPartInfo.id, takingFromStorageQty)
             setQtyTakenFromStorage(takingFromStorageQty)
             await updateApprovedStorageWithdrawalByID(orderedPartInfo.id, true)
-            console.log("approved taking from storage")
           }
         } catch (error) {
         toast.error("Error occured while fetching storage data")
@@ -203,7 +191,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   }
 
   const handleApproveOffice = () => {
-    console.log("Office Approve action triggered");
     const approvePartFromOffice = async() => {
       try {
         await updateApprovedOfficeOrderByID(orderedPartInfo.id,true)
@@ -218,7 +205,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   };
 
   const handleApproveBudget = () => {
-    console.log("Approve Budget action triggered");
     const approveBudget = async() => {
       try {
         await updateApprovedBudgetByID(orderedPartInfo.id, true);
@@ -234,7 +220,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   };
 
   const handleAddOfficeNote = () => {
-    console.log("adding office note");
     
     const addOfficeNote = async (updated_note: string) => {
       try {
@@ -264,7 +249,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
 
 
   const handleDenyPart = () => {
-    console.log("Deny action triggered");
     const deletingPart = async() => {
       try {
         await deleteOrderedPartByID(orderedPartInfo.id)
@@ -279,7 +263,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   };
 
   const handleReviseBudget = () => {
-    console.log("Denying budget");
     const updateCosting = async(brand: string | null, cost:number | null, vendor: string | null) => {
       try {
         setCostLoading(true);
@@ -364,7 +347,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   };
 
   const handleUpdatePurchaseDate = () => {
-    console.log("Updating purchase date" + datePurchased);
     const updatePurchaseDate = async() => {
       if (datePurchased){
         try {
@@ -385,7 +367,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   }
 
   const handleUpdateSentDate = () => {
-    console.log("Updating sent date with" + dateSent);
     const updateSentDate = async() => {
       if(dateSent && datePurchased){
         if (dateSent.getDate()>=datePurchased.getDate()){
@@ -414,7 +395,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   
 
   const handleUpdateReceivedDate = () => {
-    console.log("Updating received date" + dateReceived);
     const updateReceivedDate = async() => {
       if(dateReceived && dateSent){
         if (dateReceived.getDate()>=dateSent.getDate()){
@@ -448,7 +428,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
 
 
   const handleSampleReceived = () => {
-    console.log("Sample received")
     const updateSampleReceived = async () => {
       try {
         await updateSampleReceivedByID(orderedPartInfo.id, true);
@@ -463,7 +442,6 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   }
 
   const handleReturnPart = () => {
-    console.log("Returning Part")
     
     const returnOrderedPart = async () => {
       try {
