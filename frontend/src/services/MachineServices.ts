@@ -96,7 +96,7 @@ export const fetchEnrichedMachines = async (
 };
 
 export const fetchAllMachines = async (
-    factorySectionId: number | undefined,
+    factorySectionId?: number | undefined,
 ) => {
     let queryBuilder = supabase_client
         .from('machines')
@@ -117,6 +117,45 @@ export const fetchAllMachines = async (
 
     console.log("fetching all machines")
     return { data };
+};
+
+export const fetchAllMachinesEnriched = async (factorySectionId?: number | undefined) => {
+    try {
+        // Fetch raw machines
+        let queryBuilder = supabase_client
+            .from('machines')
+            .select('id, name, is_running, factory_section_id');
+
+        if (factorySectionId !== undefined && factorySectionId !== -1) {
+            queryBuilder = queryBuilder.eq('factory_section_id', factorySectionId);
+        }
+
+        const { data: machines, error } = await queryBuilder;
+        if (error) {
+            console.error('Error fetching machines:', error.message);
+            return { data: [], error };
+        }
+
+        // Fetch additional details for enrichment
+        const allSections = await fetchAllFactorySections();
+        const allFactories = await fetchFactories();
+
+        // Enrich machines with factory and section names
+        const enrichedMachines = machines.map((machine) => {
+            const section = allSections.find((s) => s.id === machine.factory_section_id);
+            const factory = allFactories.find((f) => f.id === section?.factory_id);
+            return {
+                ...machine,
+                factory: factory?.name || "Unknown Factory",
+                factory_section_name: section?.name || "Unknown Section",
+            };
+        });
+
+        return { data: enrichedMachines, error: null };
+    } catch (err) {
+        console.error("Error in fetchAllMachinesEnriched:", err);
+        return { data: [], error: err };
+    }
 };
 
 
