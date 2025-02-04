@@ -69,11 +69,11 @@ const InvoicePage = () => {
         <div className='flex justify-end m-2'>
             <Button onClick={() => handlePrint()}>Print Invoice</Button>
         </div>
-        <div className='flex justify-center mt-2'>
+        <div className='flex justify-center'>
         <div  ref={invoiceRef} className="flex min-h-screen flex-col mx-2 w-[1000px]">
           <div className="mt-2 mx-4">
-            <h1 className="text-5xl">Purchase Requisition</h1>
-            <p className='mt-2'>Akbar Cotton Mills Internal Tool</p>
+            <h1 className="text-5xl">{order.factories.name}</h1>
+            <p className='mt-2'>Purchase Requisition</p>
             <p>{formattedDate}</p>
             <Separator className='my-2'/>
           </div>

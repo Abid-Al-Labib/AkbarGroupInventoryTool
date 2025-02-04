@@ -18,6 +18,7 @@ import { supabase_client } from "@/services/SupabaseClient";
 import { updateMachinePartQty } from "@/services/MachinePartsService";
 import { addDamagePartQuantity } from "@/services/DamagedGoodsService";
 import { setMachineIsRunningById } from "@/services/MachineServices";
+import { Separator } from '@/components/ui/separator';
 
 interface OrderedPartsTableProp {
   mode:  "view" | "manage" | "invoice"
@@ -383,67 +384,52 @@ const handleOrderManagement = async () => {
   }
   else if (mode==="invoice"){
     return(      
-      <Card x-chunk="dashboard-06-chunk-0" className="mt-1">
-        <CardHeader>
-          <CardTitle>Parts Ordered</CardTitle>
-          <CardDescription>
+
+        <div>
+          <h2 className="text-lg font-bold">Parts Ordered</h2>
           <p>The list of parts that were ordered.</p>
-          </CardDescription>
-        </CardHeader>
-          {(loadingTable===true)? (
-                  <div className='animate-spin flex flex-row justify-center p-5'>
-                      <Loader2 />
-                  </div>
+        <Table className="">
+          <TableHeader>
+          <TableRow>
+            <TableHead></TableHead>
+            <TableHead>Part</TableHead>
+            <TableHead>Brand</TableHead>
+            <TableHead>Vendor</TableHead>
+            <TableHead>Qty(Unit)</TableHead>
+            <TableHead>Cost/Unit</TableHead>
+            <TableHead>Subtotal</TableHead>
+          </TableRow>
+          </TableHeader>
+          {loadingTable? (
+            <div className='flex flex-row justify-center'>
+                <Loader2 className='h-8 w-8 animate-spin'/>
+            </div>
           ):
-
-
-        <CardContent>
-          <Table>
-            <TableHeader>
+            <TableBody>
+            {orderedParts.map((orderedPart,index) => (                                        
+                <OrderedPartRow key={orderedPart.id}
+              index={index+1}
+              mode="invoice"
+              orderedPartInfo={orderedPart}
+              current_status={current_status}
+              factory_id={order.factory_id}
+              machine_id={order.machine_id}
+              order_type={order.order_type}/>
+            ))}
             <TableRow>
-              <TableHead></TableHead>
-              <TableHead>Part</TableHead>
-              <TableHead>History</TableHead>
-              <TableHead>Brand</TableHead>
-              <TableHead>Vendor</TableHead>
-              <TableHead>Qty</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead>Cost/Unit</TableHead>
-              <TableHead>Subtotal</TableHead>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
             </TableRow>
-            </TableHeader>
-            {loadingTable? (
-              <div className='flex flex-row justify-center'>
-                  <Loader2 className='h-8 w-8 animate-spin'/>
-              </div>
-            ):
-              <TableBody>
-              {orderedParts.map((orderedPart,index) => (                                        
-                  <OrderedPartRow key={orderedPart.id}
-                index={index+1}
-                mode="invoice"
-                orderedPartInfo={orderedPart}
-                current_status={current_status}
-                factory_id={order.factory_id}
-                machine_id={order.machine_id}
-                order_type={order.order_type}/>
-              ))}
-              <TableRow>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell className="font-bold">Total:</TableCell>
-                <TableCell className="font-bold">{totalCost}</TableCell>
-              </TableRow>
-              </TableBody>
-            }  
-          </Table>
-        </CardContent>
-        }
-      </Card>
+            </TableBody>
+          }  
+        </Table>
+        <div className="flex justify-end">
+          <span className="font-bold">Total: {totalCost}</span>
+        </div>
+        </div>
     )
   }
   else if (mode==="manage"){

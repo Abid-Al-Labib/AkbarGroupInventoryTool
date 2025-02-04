@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext"
 import { updateMachinePartQty } from "@/services/MachinePartsService"
 import { Badge } from "../ui/badge"
 import { addDamagePartQuantity } from "@/services/DamagedGoodsService"
+import { Separator } from "../ui/separator"
 
 
 interface OrderedPartRowProp{
@@ -550,25 +551,30 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   else if(mode==='invoice'){
     return (
       <TableRow>
-        <TableCell>{index}.</TableCell>
-        <TableCell className="whitespace-nowrap"><a className="hover:underline" target="_blank" href={`/viewpart/${orderedPartInfo.part_id}`}>{orderedPartInfo.parts.name}</a></TableCell>
-        <TableCell>
-          <div className="flex-col">
-            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <div className="text-xs">Cost: {lastUnitCost?`BDT ${lastUnitCost}` : '-'}</div>}
+      <TableCell>{index}.</TableCell>
+      <TableCell>
+        <div className="flex-row gap-2">
+          <a className="font-bold text-lg hover:underline" target="_blank" href={`/viewpart/${orderedPartInfo.part_id}`}>{orderedPartInfo.parts.name}</a>
+          <div className="mt-1 text-xs">
+            History:
+          </div>
+          <div className="flex gap-2">
+            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <div className="whitespace-nowrap text-xs">Cost: {lastUnitCost?`BDT ${lastUnitCost}` : '-'}</div>}
             <div className="text-xs">Vendor: {lastVendor? lastVendor: '-'}</div>
-            <div className="text-xs">Date: {lastPurchaseDate? convertUtcToBDTime(lastPurchaseDate).split(',')[0]: '-'}</div>
+          </div>
+          <div className="flex gap-2">
+            <div className="text-xs">LP Date: {lastPurchaseDate? convertUtcToBDTime(lastPurchaseDate).split(',')[0]: '-'}</div>
             <div className="text-xs">Change Date: {lastChangeDate? convertUtcToBDTime(lastChangeDate).split(',')[0]: '-'}</div>
           </div>
-        </TableCell>
-        {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell className="whitespace-nowrap">{orderedPartInfo.brand || '-'}</TableCell>}
-        {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell className="whitespace-nowrap">{orderedPartInfo.vendor || '-'}</TableCell>}
-        <TableCell className="whitespace-nowrap">{orderedPartInfo.qty}</TableCell>
-        <TableCell className="whitespace-nowrap md:table-cell">{orderedPartInfo.parts.unit}</TableCell>
-        {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell className="whitespace-nowrap">{orderedPartInfo.unit_cost || '-'}</TableCell>}
-        {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell className="whitespace-nowrap">{`${orderedPartInfo.unit_cost?orderedPartInfo.unit_cost*orderedPartInfo.qty: "-"}`}</TableCell>}
+        </div>
+      </TableCell>
+      {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell>{orderedPartInfo.brand || '-'}</TableCell>}
+      {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell>{orderedPartInfo.vendor || '-'}</TableCell>}
+      <TableCell className="whitespace-nowrap">{orderedPartInfo.qty}({orderedPartInfo.parts.unit})</TableCell>
+      {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell className="whitespace-nowrap">{orderedPartInfo.unit_cost || '-'}</TableCell>}
+      {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell className="whitespace-nowrap">{`${orderedPartInfo.unit_cost?orderedPartInfo.unit_cost*orderedPartInfo.qty: "-"}`}</TableCell>}
 
       </TableRow>
-
     )
   }
   else if(mode==="manage"){
