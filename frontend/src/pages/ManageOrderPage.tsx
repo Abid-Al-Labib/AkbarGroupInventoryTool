@@ -2,7 +2,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import OrderInfo from "@/components/customui/OrderInfo";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Order } from "@/types";
+import { Order, Part } from "@/types";
 import { fetchOrderByID } from "@/services/OrdersService";
 import OrderedPartsTable from "@/components/customui/OrderedPartsTable";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,14 @@ import { supabase_client } from "@/services/SupabaseClient";
 import { DialogContent, Dialog, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 import NavigationBar from "../components/customui/NavigationBar"
+import { fetchAllParts } from "@/services/PartsService";
 
 const ManageOrderPage = () => {
   const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
+  const [parts, setParts] = useState<Part[]>([])
   const [loading, setLoading] = useState(true);
+  const [partsLoading, setPartsLoading] = useState(true)
   const navigate = useNavigate();
   const profile = useAuth().profile
   const [isManageOrderAuthorizedDialogOpen, setIsManageOrderAuthorizedDialogOpen] = useState<boolean>(false)
@@ -56,6 +59,23 @@ const ManageOrderPage = () => {
     }
   };
 
+  const loadParts = async () => {
+    try {
+      setPartsLoading(true)
+      const parts_data = await fetchAllParts();
+      if (parts_data) {
+        setParts(parts_data.data)
+      }
+      else {
+        setParts([])
+      }
+    } catch (error) {
+      toast.error("Failed to fetch parts")
+    } finally {
+      setPartsLoading(false)
+    }
+  }
+
   useEffect(() => {
     const channel = supabase_client
         .channel('order-changes')
@@ -76,14 +96,13 @@ const ManageOrderPage = () => {
   }, [id, navigate]);
   
   useEffect(() => { 
+    loadParts();
     loadOrder();
   }, []);
 
-  if (loading) {
+  if (loading || partsLoading) {
     return <div>Loading...</div>; // Add a loading state if necessary
   }
-
-
 
   if(!order)
   {  
@@ -102,6 +121,7 @@ const ManageOrderPage = () => {
         <OrderedPartsTable
           mode="manage"
           order={order}
+          parts = {parts}
           current_status={order.statuses}
         />
       <div className="flex justify-end">

@@ -10,7 +10,7 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import toast from "react-hot-toast"
 import { deleteOrderedPartByID, fetchLastChangeDate, fetchLastCostAndPurchaseDate, returnOrderedPartByID, updateApprovedBudgetByID, updateApprovedOfficeOrderByID, updateApprovedPendingOrderByID, updateApprovedStorageWithdrawalByID, updateCostingByID, updateMrrNumberByID, updateOfficeNoteByID, updateOrderedPartQtyByID, updatePurchasedDateByID, updateQtyTakenFromStorage, updateReceivedByFactoryDateByID, updateSampleReceivedByID, updateSentDateByID } from "@/services/OrderedPartsService"
-import { showBudgetApproveButton, showPendingOrderApproveButton, showOfficeOrderApproveButton, showOfficeOrderDenyButton, showPurchaseButton, showQuotationButton, showReceivedButton, showSampleReceivedButton, showSentButton, showReviseBudgetButton, showOfficeNoteButton, showApproveTakingFromStorageButton, showMrrButton, showReturnButton } from "@/services/ButtonVisibilityHelper"
+import { showBudgetApproveButton, showPendingOrderApproveButton, showOfficeOrderApproveButton, showOfficeOrderDenyButton, showPurchaseButton, showQuotationButton, showReceivedButton, showSampleReceivedButton, showSentButton, showReviseBudgetButton, showOfficeNoteButton, showApproveTakingFromStorageButton, showMrrButton, showReturnButton, showRemovePartButton, showUpdatePartQuantityButton } from "@/services/ButtonVisibilityHelper"
 import OrderedPartInfo from "./OrderedPartInfo"
 import { convertUtcToBDTime} from "@/services/helper"
 import { Checkbox } from "../ui/checkbox"
@@ -41,6 +41,7 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   const [dateReceived, setDateReceived] = useState<Date | undefined>(orderedPartInfo.part_received_by_factory_date? new Date(orderedPartInfo.part_received_by_factory_date): new Date())
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [isApproveFromOfficeDialogOpen, setIsApproveFromOfficeDialogOpen] = useState(false);
+  const [isRemovePartDialogOpen, setIsRemovePartDialogOpen] = useState(false);
   const [isApproveFromFactoryDialogOpen, setIsApproveFromFactoryDialogOpen] = useState(false);
   const [isApproveBudgetDialogOpen, setIsApproveBudgetDialogOpen] = useState(false);
   const [isSampleReceivedDialogOpen, setIsSampleReceivedDialogOpen] = useState(false);
@@ -62,11 +63,13 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   const [lastUnitCost, setLastUnitCost] = useState<number | null>(null);
   const [lastPurchaseDate, setLastPurchaseDate] = useState<string | null>(null); // assuming date is string
   const [lastVendor, setLastVendor] = useState<string|null>(null);
+  const [newQuantity, setNewQuantity] = useState("")
   const [lastChangeDate, setLastChangeDate] = useState<string|null>(null)
   const [denyCost, setDenyCost] = useState(false);
   const [denyBrand, setDenyBrand] = useState(false);
   const [denyVendor, setDenyVendor] = useState(false);
   const [noteValue, setNoteValue] = useState<string>('');
+  const [isUpdatePartQuantityDialogOpen, setIsUpdatePartQuantityDialogOpen] = useState(false);
   const navigate = useNavigate()
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
   const [disableTakeStorageRow, setDisableTakeStorageRow] = useState(false);
@@ -311,6 +314,34 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
 
     updateMrrNumber(mrrNumber)
     setMrrNumber('')
+
+  }
+
+  const handleUpdatePartQty = async () => {
+    if (newQuantity == ''){
+      toast.error("Please enter a valid number")
+      return
+    }
+    const qty = Number(newQuantity)
+    try{
+      if (qty == orderedPartInfo.qty) {
+        toast.error("Quantity was not provided or was the same value of current quantity")
+      }
+      else if (qty<0) {
+        toast.error("Negative number is not a valid input")
+      }
+      else if (qty===0){
+        toast.error("Zero is not a valid input")
+      }
+      else{
+        await updateOrderedPartQtyByID(orderedPartInfo.id, qty)
+
+      }
+    }catch{
+      toast.error("Failed to update quantity")
+    } finally {
+      setNewQuantity("")
+    }
 
   }
 
@@ -614,6 +645,18 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
                   </DropdownMenuItem>
                 )}
               {
+                showRemovePartButton(current_status.name) && (
+                  <DropdownMenuItem onClick={() => setIsRemovePartDialogOpen(true)}>
+                    <span className="hover:text-red-600">Remove part</span>
+                  </DropdownMenuItem>
+                )}
+              {
+                showUpdatePartQuantityButton(current_status.name) && (
+                  <DropdownMenuItem onClick={() => setIsUpdatePartQuantityDialogOpen(true)}>
+                    <span className="hover:text-blue-600">Update Part Qty</span>
+                  </DropdownMenuItem>
+                )}
+              {
                 showApproveTakingFromStorageButton(current_status.name, orderedPartInfo.in_storage, orderedPartInfo.approved_storage_withdrawal) && (
                   <DropdownMenuItem onClick={() => setIsTakeFromStorageDialogOpen(true)}>
                     <span className="hover:text-green-600">Take from storage</span>
@@ -785,6 +828,53 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
                 </DialogDescription>
         
                 <Button onClick={handleSampleReceived}>Confirm</Button>
+              </DialogContent>
+            </Dialog>
+
+
+            <Dialog open={isRemovePartDialogOpen} onOpenChange={setIsRemovePartDialogOpen}>
+              <DialogContent>
+                <DialogTitle>
+                  Remove part
+                </DialogTitle>
+                <DialogDescription>
+                  <p className="text-sm text-muted-foreground">
+                    You are about to remove part - {orderedPartInfo.parts.name} from the list
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Please confirm.
+                  </p>
+                </DialogDescription>
+
+                <Button onClick={handleDenyPart}>Confirm</Button>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isUpdatePartQuantityDialogOpen} onOpenChange={setIsUpdatePartQuantityDialogOpen}>
+              <DialogContent>
+                <DialogTitle>
+                  Update Quantity
+                </DialogTitle>
+                <DialogDescription>
+                  <p className="text-sm text-muted-foreground">
+                    Current Quantity ({orderedPartInfo.qty}) will be updated.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Please enter the new quantity
+                  </p>
+                  <div className="grid gap-3">
+                        <Label htmlFor="new_quantity">Quantity</Label>
+                        <Input 
+                          id="new_quantity" 
+                          type="number"
+                          // value={newQuantity} 
+                          placeholder="Enter the new quantity" 
+                          onChange={(e) => setNewQuantity(e.target.value)}
+                          />
+                    </div>
+                </DialogDescription>
+
+                <Button onClick={handleUpdatePartQty}>Confirm</Button>
               </DialogContent>
             </Dialog>
 
