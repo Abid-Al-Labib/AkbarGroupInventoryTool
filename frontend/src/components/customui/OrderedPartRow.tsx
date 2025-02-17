@@ -555,6 +555,10 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
       <TableCell>
         <div className="flex-row gap-2">
           <a className="font-bold text-lg hover:underline" target="_blank" href={`/viewpart/${orderedPartInfo.part_id}`}>{orderedPartInfo.parts.name}</a>
+          <div className="flex gap-2">
+            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <div className="whitespace-nowrap text-xs font-bold">MRR: {orderedPartInfo.mrr_number? orderedPartInfo.mrr_number : '-'}</div>}
+            <div className="text-xs">Received Date: {orderedPartInfo.part_received_by_factory_date? convertUtcToBDTime(orderedPartInfo.part_received_by_factory_date).split(',')[0]: '-'}</div>
+          </div>
           <div className="mt-1 text-xs">
             History:
           </div>
