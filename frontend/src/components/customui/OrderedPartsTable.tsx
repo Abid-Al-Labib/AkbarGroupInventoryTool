@@ -461,11 +461,11 @@ const handleOrderManagement = async () => {
           <TableRow>
             <TableHead></TableHead>
             <TableHead>Part</TableHead>
-            <TableHead>Brand</TableHead>
-            <TableHead>Vendor</TableHead>
+            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableHead>Brand</TableHead>}
+            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableHead>Vendor</TableHead>}
             <TableHead>Qty(Unit)</TableHead>
-            <TableHead>Cost/Unit</TableHead>
-            <TableHead>Subtotal</TableHead>
+            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableHead>Cost/Unit</TableHead>}
+            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableHead>Subtotal</TableHead>}
           </TableRow>
           </TableHeader>
           {loadingTable? (
@@ -494,9 +494,9 @@ const handleOrderManagement = async () => {
             </TableBody>
           }  
         </Table>
-        <div className="flex justify-end">
+        {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <div className="flex justify-end">
           <span className="font-bold">Total: {totalCost}</span>
-        </div>
+        </div>}
         </div>
     )
   }

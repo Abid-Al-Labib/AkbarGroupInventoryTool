@@ -94,13 +94,11 @@ const ViewOrderPage = () => {
         </main>
         <div className="flex justify-end">
           <div className="my-3 mx-3 flex gap-2">
-            {(profile?.permission === 'admin' || profile?.permission === 'finance') && (
               <Button  
                 onClick={CreateInvoice}
               >
                 Create Invoice
               </Button>
-            )}
             <Link to={'/orders'}>
               <Button>Back To Orders</Button>
             </Link>

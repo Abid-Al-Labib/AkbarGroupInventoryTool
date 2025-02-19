@@ -586,21 +586,25 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
       <TableCell>
         <div className="flex-row gap-2">
           <a className="font-bold text-lg hover:underline" target="_blank" href={`/viewpart/${orderedPartInfo.part_id}`}>{orderedPartInfo.parts.name}</a>
+          {(profile?.permission === 'admin' || profile?.permission=== 'finance') && 
           <div className="flex gap-2">
-            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <div className="whitespace-nowrap text-xs font-bold">MRR: {orderedPartInfo.mrr_number? orderedPartInfo.mrr_number : '-'}</div>}
+            <div className="whitespace-nowrap text-xs font-bold">MRR: {orderedPartInfo.mrr_number? orderedPartInfo.mrr_number : '-'}</div>
             <div className="text-xs">Received Date: {orderedPartInfo.part_received_by_factory_date? convertUtcToBDTime(orderedPartInfo.part_received_by_factory_date).split(',')[0]: '-'}</div>
-          </div>
+          </div>}
+          {(profile?.permission === 'admin' || profile?.permission=== 'finance') && 
           <div className="mt-1 text-xs">
             History:
-          </div>
+          </div>}
+          { (profile?.permission === 'admin' || profile?.permission=== 'finance') && 
           <div className="flex gap-2">
-            {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <div className="whitespace-nowrap text-xs">Cost: {lastUnitCost?`BDT ${lastUnitCost}` : '-'}</div>}
+            <div className="whitespace-nowrap text-xs">Cost: {lastUnitCost?`BDT ${lastUnitCost}` : '-'}</div>
             <div className="text-xs">Vendor: {lastVendor? lastVendor: '-'}</div>
-          </div>
+          </div>}
+          { (profile?.permission === 'admin' || profile?.permission=== 'finance') && 
           <div className="flex gap-2">
             <div className="text-xs">LP Date: {lastPurchaseDate? convertUtcToBDTime(lastPurchaseDate).split(',')[0]: '-'}</div>
             <div className="text-xs">Change Date: {lastChangeDate? convertUtcToBDTime(lastChangeDate).split(',')[0]: '-'}</div>
-          </div>
+          </div>}
         </div>
       </TableCell>
       {(profile?.permission === 'admin' || profile?.permission=== 'finance') && <TableCell>{orderedPartInfo.brand || '-'}</TableCell>}
