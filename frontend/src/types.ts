@@ -87,3 +87,18 @@ export type StatusTracker = {
     profiles: Profile,
     statuses: Status
 };
+
+export type Filter = {
+    searchType: string | undefined;
+    searchQuery: string | undefined;
+    reqNumQuery: string | undefined;
+    selectedDate?: Date | undefined;
+    dateFilterType: number | undefined; // 1 = On, 2 = Before, 3 = After
+    selectedFactoryId: number | undefined;
+    selectedFactorySectionId: number | undefined;
+    selectedMachineId: number | undefined;
+    selectedDepartmentId: number | undefined;
+    selectedStatusId: number | undefined;
+    selectedOrderType: string | undefined;
+};
+

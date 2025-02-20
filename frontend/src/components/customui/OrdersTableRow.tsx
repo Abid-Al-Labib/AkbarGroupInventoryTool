@@ -20,10 +20,9 @@ import OrderedPartsPopup from './OrderedPartsPopup';
 
 interface OrdersTableRowProps {
   order: Order
-  onDeleteRefresh: ()=>void;
 }
 
-const OrdersTableRow: React.FC<OrdersTableRowProps> = ({ order, onDeleteRefresh }) => {
+const OrdersTableRow: React.FC<OrdersTableRowProps> = ({ order }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const profile = useAuth().profile;
   const [orderedParts,setOrderedParts] = useState<OrderedPart[]|null>(null);
@@ -41,7 +40,6 @@ const OrdersTableRow: React.FC<OrdersTableRowProps> = ({ order, onDeleteRefresh 
           }
         }
         await deleteOrderByID(order.id)
-        onDeleteRefresh()
         toast.success("Order successfully deleted")
     } catch (error) {
         toast.error("Failed to delete");
