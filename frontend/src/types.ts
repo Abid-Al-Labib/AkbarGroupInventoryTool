@@ -100,5 +100,7 @@ export type Filter = {
     selectedDepartmentId: number | undefined;
     selectedStatusId: number | undefined;
     selectedOrderType: string | undefined;
+    showCompletedOrders: boolean | undefined;
+    
 };
 

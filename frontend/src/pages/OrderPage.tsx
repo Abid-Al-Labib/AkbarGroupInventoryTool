@@ -37,8 +37,9 @@ const OrderPage = () => {
     const goToPage = (page: number) => {
         const params = new URLSearchParams(searchParams);
         params.set("page", String(page));
-        setSearchParams(params); // ✅ Updates the URL
+        setSearchParams(params);
     };
+    
     
     const filterConfig: string[] = [
         "factory",
@@ -64,6 +65,7 @@ const OrderPage = () => {
         selectedDepartmentId: searchParams.get("department") ? Number(searchParams.get("department")) : undefined,
         selectedStatusId: searchParams.get("status") ? Number(searchParams.get("status")) : undefined,
         selectedOrderType: searchParams.get("orderType") || "all",
+        showCompletedOrders: searchParams.has("showCompleted")
     });
     
     useEffect(() => {
@@ -79,16 +81,17 @@ const OrderPage = () => {
             selectedDepartmentId: searchParams.get("department") ? Number(searchParams.get("department")) : undefined,
             selectedStatusId: searchParams.get("status") ? Number(searchParams.get("status")) : undefined,
             selectedOrderType: searchParams.get("orderType") || "all",
-        });
+            showCompletedOrders: searchParams.has("showCompleted")
 
+        });
         setCurrentPage(searchParams.get("page") ? Number(searchParams.get("page")) : 1);
     }, [searchParams]);
 
 
     useEffect(() => {
-        console.log("Fetching orders with filter changes")
-        fetchOrdersForPage();
-    }, [filters]);
+    fetchOrdersForPage();
+}, [filters, currentPage]); 
+
 
     const fetchOrdersForPage = async (page = currentPage) => {
 
@@ -109,7 +112,8 @@ const OrderPage = () => {
         } finally {
             setLoading(false);
         }
-    }; [filters]
+    };
+    
 
     useEffect(() => {
         const channel = supabase_client
@@ -129,7 +133,7 @@ const OrderPage = () => {
         .subscribe()
         // fetchOrdersForPage(currentPage);
         
-    }, [currentPage,showCompleted]);
+    }, [currentPage]);
 
     return (
         <>
@@ -149,10 +153,23 @@ const OrderPage = () => {
                                     </span> */}
 
                                     <div className="items-top flex space-x-2">
-                                        <Switch
-                                            checked={showCompleted}
-                                            onCheckedChange={() => { setShowCompleted(!showCompleted), goToPage(1) }}
-                                        />
+                                    <Switch
+                                        checked={showCompleted}
+                                        onCheckedChange={() => {
+                                            const newShowCompleted = !showCompleted;
+                                            setShowCompleted(newShowCompleted); 
+                                            
+                                            const params = new URLSearchParams(searchParams);
+                                            if (newShowCompleted) {
+                                                params.set("showCompleted", "true");
+                                            } else {
+                                                params.delete("showCompleted");
+                                            }
+                                            
+                                            setSearchParams(params);
+                                        }}
+                                    />
+
                                         <Label>Show Completed Orders</Label>
                                     </div>
                                 </div>
