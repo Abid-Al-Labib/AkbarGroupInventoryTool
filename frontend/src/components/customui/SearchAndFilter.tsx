@@ -30,19 +30,32 @@ import {
 import { fetchAllMachines } from "@/services/MachineServices";
 import { fetchStatuses } from "@/services/StatusesService";
 
-interface SearchAndFilterProps {
-  filterConfig?: string[];
+interface FilterOption {
+  type: string;
+  label?: string | string[];  // Can be a single string or an array of labels
 }
 
+interface SearchAndFilterProps {
+  filterConfig?: FilterOption[];
+}
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   filterConfig,
 }) => {
 
   const shouldShowFilter = (type: string) => {
-    return !filterConfig || filterConfig.includes(type);
+    return !filterConfig || filterConfig.some((filter) => filter.type === type);
   };
 
+  const getFilterLabel = (type: string, index = 0): string => {
+    const label = filterConfig?.find(filter => filter.type === type)?.label;
+    if (Array.isArray(label)) {
+      return label[index] ?? label[0]; // Return requested index, fallback to first index if undefined
+    }
+    return label ?? `Enter ${type}`; // If it's a string, return it; otherwise, use default
+  };
+  
+  
   const [searchParams, setSearchParams] = useSearchParams();
 
   // States for filters and dropdowns
@@ -205,13 +218,13 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
             <>
               <Input
                 type="search"
-                placeholder="Enter ID..."
+                placeholder={getFilterLabel("id")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Input
                 type="search"
-                placeholder="Enter Requisition Number..."
+                placeholder={getFilterLabel("id", 1)}
                 value={reqNumQuery}
                 onChange={(e) => setReqNumQuery(e.target.value)}
               />
@@ -355,7 +368,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           {shouldShowFilter("partId") && (
             <Input
               type="search"
-              placeholder="Enter Part ID..."
+              placeholder={getFilterLabel("partId")}
               value={partIdQuery}
               onChange={(e) => setPartIdQuery(e.target.value)}
             />
@@ -363,7 +376,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           {shouldShowFilter("partName") && (
             <Input
               type="search"
-              placeholder="Enter Part Name..."
+              placeholder={getFilterLabel("partName")}
               value={partNameQuery}
               onChange={(e) => setPartNameQuery(e.target.value)}
             />

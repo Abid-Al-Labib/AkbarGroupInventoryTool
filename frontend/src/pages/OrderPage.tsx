@@ -41,15 +41,15 @@ const OrderPage = () => {
     };
     
     
-    const filterConfig: string[] = [
-        "factory",
-        "factorySection",
-        "machine",
-        "department",
-        "status",
-        "id",
-        "date",
-        "orderType",
+    const filterConfig = [
+        { type: "factory"},
+        { type: "factorySection"},
+        { type: "machine"},
+        { type: "department"},
+        { type: "status"},
+        { type: "id", label: ["Enter ID", "Enter Requisition Number"]},
+        { type: "date"},
+        { type: "orderType"},
     ];
     
     

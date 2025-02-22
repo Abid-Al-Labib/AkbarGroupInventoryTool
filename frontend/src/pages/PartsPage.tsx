@@ -39,9 +39,9 @@ const PartsPage = () => {
         setSearchParams(params);
     };
 
-    const filterConfig: string[] = [
-        "partId",
-        "partName"
+    const filterConfig = [
+        {type: "partId", label: ["Enter Part ID"]},
+        {type: "partName", label: ["Enter Part Name"]}
     ];
 
     const [filters, setFilters] = useState({
