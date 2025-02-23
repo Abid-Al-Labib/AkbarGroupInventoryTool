@@ -298,20 +298,29 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           {shouldShowFilter("machine") && (
             <>
               <Label>Machine</Label>
-              <Select value={selectedMachineId.toString()} onValueChange={(value) => setSelectedMachineId(Number(value))} disabled={selectedFactorySectionId === -1}>
+              <Select
+                value={selectedMachineId.toString()}
+                onValueChange={(value) => setSelectedMachineId(Number(value))}
+                disabled={selectedFactorySectionId === -1}
+              >
                 <SelectTrigger>
-                  <SelectValue>{machines.find(m => m.id === selectedMachineId)?.name || "Select Machine"}</SelectValue>
+                  <SelectValue>
+                    {machines.find((m) => m.id === selectedMachineId)?.name || "Select Machine"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {machines.map(machine => (
-                    <SelectItem key={machine.id} value={machine.id.toString()}>{machine.name}</SelectItem>
-                  ))}
+                  {machines
+                    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })) // Sort alphabetically & numerically
+                    .map((machine) => (
+                      <SelectItem key={machine.id} value={machine.id.toString()}>
+                        {machine.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </>
           )}
 
-  
           {/* Department Dropdown */}
           {shouldShowFilter("department") && (
             <>
@@ -329,7 +338,6 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
             </>
           )}
 
-  
           {/* Status Dropdown */}
           {shouldShowFilter("status") && (
             <>
