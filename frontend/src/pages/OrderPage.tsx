@@ -25,10 +25,11 @@ const OrderPage = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [ordersPerPage] = useState(20);
     const [count, setCount] = useState(0);
-    const [showCompleted, setShowCompleted] = useState<boolean>(false);
     const profile = useAuth().profile;
 
     const [searchParams, setSearchParams] = useSearchParams();
+
+    const [showCompleted, setShowCompleted] = useState<boolean>(searchParams.has("showCompleted"));
 
     const [currentPage, setCurrentPage] = useState(
         searchParams.get("page") ? Number(searchParams.get("page")) : 1
