@@ -6,7 +6,7 @@ export type Department = Tables<"departments">
 export type Status = Tables<"statuses">
 export type Profile = Tables<"profiles">
 export type Factory = Tables<"factories">
-export type MachinePart = Tables<"machine_parts">
+// export type MachinePart = Tables<"machine_parts">
 export type StoragePart = Tables<"storage_parts">
 export type ApplicationSettings = Tables<"app_settings">
 
@@ -24,6 +24,16 @@ export type Machine = {
     is_running: boolean,
     factory_section_id: number,
     factory_sections: FactorySection
+}
+
+export type MachinePart = {
+    id: number;
+    machine_id: number;
+    part_id: number;
+    qty: number;
+    req_qty: number | null
+    parts: Part
+    machines: Machine
 }
 
 export type FactorySection = {
@@ -104,3 +114,5 @@ export type Filter = {
     
 };
 
+export type ManagementType = "factory" | "factorySections" | "machines" | "machineParts" | "departments";
+ 

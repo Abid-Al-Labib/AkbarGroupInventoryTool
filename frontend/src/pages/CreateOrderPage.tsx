@@ -430,7 +430,7 @@ const CreateOrderPage = () => {
         const loadMachines = async () => {
             if (selectedFactorySectionId !== -1) {
                 const fetchedMachines = await fetchAllMachines(selectedFactorySectionId);
-                setMachines(fetchedMachines.data);
+                setMachines(fetchedMachines);
                 setSelectedMachineId(-1); // Reset machine ID when the section changes
                 setTimeout(() => setSelectedMachineId(-1), 0); // Clear and reset
             } else {

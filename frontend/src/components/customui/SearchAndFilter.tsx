@@ -29,6 +29,8 @@ import {
 } from "@/services/FactoriesService";
 import { fetchAllMachines } from "@/services/MachineServices";
 import { fetchStatuses } from "@/services/StatusesService";
+import { Factory, FactorySection, Machine } from "@/types";
+
 
 interface FilterOption {
   type: string;
@@ -74,19 +76,21 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   );
   
 
-  const [factories, setFactories] = useState<any[]>([]);
-  const [factorySections, setFactorySections] = useState<any[]>([]);
+  const [factories, setFactories] = useState<Factory[]>([]);
+  const [selectedFactory, setSelectedFactory] = useState<Factory | null>(null);
+
+  const [factorySections, setFactorySections] = useState<FactorySection[]>([]);
+  const [selectedFactorySection, setSelectedFactorySection] =useState<FactorySection | null>(null);
+
   const [machines, setMachines] = useState<any[]>([]);
+  const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
+
   const [departments, setDepartments] = useState<any[]>([]);
   const [statuses, setStatuses] = useState<any[]>([]);
 
+  // Store full objects instead of just IDs
+
   // Dropdown states
-  const [selectedFactoryId, setSelectedFactoryId] = useState<number>(
-    searchParams.get("factory") ? Number(searchParams.get("factory")) : -1
-  );
-  const [selectedFactorySectionId, setSelectedFactorySectionId] = useState<number>(
-    searchParams.get("section") ? Number(searchParams.get("section")) : -1
-  );
   const [selectedMachineId, setSelectedMachineId] = useState<number>(
     searchParams.get("machine") ? Number(searchParams.get("machine")) : -1
   );
@@ -116,36 +120,43 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   }, []);
 
   useEffect(() => {
-    if (selectedFactoryId !== -1) {
+    if (selectedFactory) {
       const fetchSections = async () => {
-        setFactorySections(await fetchFactorySections(selectedFactoryId));
-        setSelectedFactorySectionId(-1); // Reset dependent selections
+        const sections = await fetchFactorySections(selectedFactory.id);
+        setFactorySections(sections);
+        setSelectedFactorySection(null); // Reset selection
         setSelectedMachineId(-1);
       };
       fetchSections();
     } else {
       setFactorySections([]);
     }
-  }, [selectedFactoryId]);
+  }, [selectedFactory]);
 
   useEffect(() => {
-    if (selectedFactorySectionId !== -1) {
+    if (selectedFactorySection) {
       const fetchMachinesData = async () => {
-        setMachines((await fetchAllMachines(selectedFactorySectionId)).data);
-        setSelectedMachineId(-1);
+        setMachines(await fetchAllMachines(selectedFactorySection.id));
+        setSelectedMachine(null);
       };
       fetchMachinesData();
     } else {
       setMachines([]);
     }
-  }, [selectedFactorySectionId]);
+  }, [selectedFactorySection]);
+
+  useEffect(() => {
+    console.log("Selected Factory:", selectedFactory);
+    console.log("Selected Factory Section:", selectedFactorySection);
+    console.log("Selected Machine:", selectedMachine);
+  }, [selectedFactory, selectedFactorySection, selectedMachine]);
 
   const handleApplyFilters = () => {
     const params = new URLSearchParams();
 
-    if (selectedFactoryId !== -1) params.set("factory", selectedFactoryId.toString());
-    if (selectedFactorySectionId !== -1) params.set("section", selectedFactorySectionId.toString());
-    if (selectedMachineId !== -1) params.set("machine", selectedMachineId.toString());
+    if (selectedFactory) params.set("factory", selectedFactory.id.toString());
+    if (selectedFactorySection) params.set("section", selectedFactorySection.id.toString());
+    if (selectedMachine) params.set("machine", selectedMachine.id.toString());
     if (selectedDepartmentId !== -1) params.set("department", selectedDepartmentId.toString());
     if (selectedStatusId !== -1) params.set("status", selectedStatusId.toString());
     params.set("searchType", searchType);
@@ -170,9 +181,9 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
     setReqNumQuery("");
     setSelectedDate(undefined);
     setDateFilterType(1);
-    setSelectedFactoryId(-1);
-    setSelectedFactorySectionId(-1);
-    setSelectedMachineId(-1);
+    setSelectedFactory(null);
+    setSelectedFactorySection(null);
+    setSelectedMachine(null);
     setSelectedDepartmentId(-1);
     setSelectedStatusId(-1);
     setSelectedOrderType("all");
@@ -264,13 +275,24 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           {shouldShowFilter("factory") && (
             <>
               <Label>Factory</Label>
-              <Select value={selectedFactoryId.toString()} onValueChange={(value) => setSelectedFactoryId(Number(value))}>
+              <Select
+                onValueChange={(value) => {
+                  const factory = factories.find(
+                    (f) => f.id.toString() === value
+                  );
+                  setSelectedFactory(factory || null);
+                }}
+              >
                 <SelectTrigger>
-                  <SelectValue>{factories.find(f => f.id === selectedFactoryId)?.name || "Select Factory"}</SelectValue>
-                </SelectTrigger>
+  <SelectValue>
+    {selectedFactory && selectedFactory.name ? selectedFactory.name : "Select Factory"}
+  </SelectValue>
+</SelectTrigger>
                 <SelectContent>
-                  {factories.map(factory => (
-                    <SelectItem key={factory.id} value={factory.id.toString()}>{factory.name}</SelectItem>
+                  {factories.map((factory) => (
+                    <SelectItem key={factory.id} value={factory.id.toString()}>
+                      {factory.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -281,13 +303,24 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           {shouldShowFilter("factorySection") && (
             <>
               <Label>Factory Section</Label>
-              <Select value={selectedFactorySectionId.toString()} onValueChange={(value) => setSelectedFactorySectionId(Number(value))} disabled={selectedFactoryId === -1}>
+              <Select
+                disabled={!selectedFactory}
+                onValueChange={(value) => {
+                  const section = factorySections.find(
+                    (s) => s.id.toString() === value
+                  );
+                  setSelectedFactorySection(section || null);
+                }}
+              >
                 <SelectTrigger>
-                  <SelectValue>{factorySections.find(fs => fs.id === selectedFactorySectionId)?.name || "Select Section"}</SelectValue>
+                  <SelectValue>{selectedFactorySection ? selectedFactorySection.name : "Select Section"}</SelectValue>
+
                 </SelectTrigger>
                 <SelectContent>
-                  {factorySections.map(section => (
-                    <SelectItem key={section.id} value={section.id.toString()}>{section.name}</SelectItem>
+                  {factorySections.map((section) => (
+                    <SelectItem key={section.id} value={section.id.toString()}>
+                      {section.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -299,23 +332,25 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
             <>
               <Label>Machine</Label>
               <Select
-                value={selectedMachineId.toString()}
-                onValueChange={(value) => setSelectedMachineId(Number(value))}
-                disabled={selectedFactorySectionId === -1}
+                disabled={!selectedFactorySection}
+                onValueChange={(value) => {
+                  const machine = machines.find(
+                    (m) => m.id.toString() === value
+                  );
+                  setSelectedMachine(machine || null);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue>
-                    {machines.find((m) => m.id === selectedMachineId)?.name || "Select Machine"}
+                    {selectedMachine ? selectedMachine.name : "Select Machine"}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {machines
-                    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })) // Sort alphabetically & numerically
-                    .map((machine) => (
-                      <SelectItem key={machine.id} value={machine.id.toString()}>
-                        {machine.name}
-                      </SelectItem>
-                    ))}
+                  {machines.map((machine) => (
+                    <SelectItem key={machine.id} value={machine.id.toString()}>
+                      {machine.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </>

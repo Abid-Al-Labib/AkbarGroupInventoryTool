@@ -33,14 +33,14 @@ export const fetchFactoriesByIds = async (factoryIds:number[])=> {
 export const fetchFactorySections = async (factoryId: number) => {
     const { data, error } = await supabase_client
         .from('factory_sections')
-        .select('id, name, factory_id') 
+        .select('id, name, factory_id, factories (*)') 
         .eq('factory_id', factoryId);
 
     if (error) {
         console.error('Error fetching factory sections:', error.message);
         return [];
     }
-    return data;
+    return data as unknown as FactorySection[];
 };
 
 export const fetchFactorySectionsByIds = async (factorySectionIds: number[]) =>{
@@ -148,6 +148,27 @@ export const deleteFactorySection = async (factorySectionId: number) => {
     } catch (error) {
         console.error(error);
         toast("Proplem in deleting")
+        return false;
+    }
+};
+
+export const editFactory = async (factoryId: number, newName: string, newAbbreviation: string) => {
+    try {
+        const { error } = await supabase_client
+            .from("factories")
+            .update({ name: newName, abbreviation: newAbbreviation })
+            .eq("id", factoryId);
+
+        if (error) {
+            console.error("Error updating factory:", error.message);
+            throw new Error("Failed to update factory.");
+        }
+
+        toast.success("Factory updated successfully.");
+        return true;
+    } catch (error) {
+        console.error(error);
+        toast.error("Error updating factory.");
         return false;
     }
 };

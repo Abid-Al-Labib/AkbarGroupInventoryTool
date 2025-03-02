@@ -119,7 +119,7 @@ const MachinePartsPage = () => {
     const loadMachines = async () => {
       if (selectedFactorySectionId !== undefined && selectedFactorySectionId !== -1) {
         try {
-          const fetchedMachines = (await fetchAllMachines(selectedFactorySectionId)).data;
+          const fetchedMachines = (await fetchAllMachines(selectedFactorySectionId));
           setMachines(fetchedMachines);
           setSelectedMachineId(undefined);
         } catch (error) {
