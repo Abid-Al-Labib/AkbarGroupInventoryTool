@@ -6,19 +6,31 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import toast from "react-hot-toast";
 import { fetchFactories, fetchFactorySections } from "@/services/FactoriesService";
 import { fetchAllMachines, addMachine, deleteMachine } from "@/services/MachineServices";
-import { XCircle } from "lucide-react";
+import { Check, PlusCircle, XCircle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Factory, FactorySection } from "@/types";
+import { AnimatePresence, motion } from "framer-motion";
+import ReactSelect from "react-select";
 
 const MachineManagementCard = () => {
   const [factories, setFactories] = useState<Factory[]>([]);
-  const [selectedFactoryId, setSelectedFactoryId] = useState<number | null>(null);
   const [factorySections, setFactorySections] = useState<FactorySection[]>([]);
-  const [selectedFactorySectionId, setSelectedFactorySectionId] = useState<number | null>(null);
   const [machines, setMachines] = useState<{ id: number; name: string }[]>([]);
   const [newMachineName, setNewMachineName] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isAddingMachine, setIsAddingMachine] = useState(false);
+
+
+  const factoryFromUrl = searchParams.get("factory");
+  const sectionFromUrl = searchParams.get("factorySection");
+
+  const [selectedFactoryId, setSelectedFactoryId] = useState<number | null>(
+    factoryFromUrl ? Number(factoryFromUrl) : null
+  );
+  const [selectedFactorySectionId, setSelectedFactorySectionId] = useState<number | null>(
+    sectionFromUrl ? Number(sectionFromUrl) : null
+  );
 
   useEffect(() => {
     const factoryFromUrl = searchParams.get("factory");
@@ -148,55 +160,103 @@ const MachineManagementCard = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl p-4">
-        <div className="space-y-4">
-        {/* Select Factory */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium">Select Factory</label>
-          <Select value={selectedFactoryId?.toString() || ""} onValueChange={handleFactoryChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue>{selectedFactoryId ? factories.find(f => f.id === selectedFactoryId)?.name : "Select Factory"}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {factories.map((factory) => (
-                <SelectItem key={factory.id} value={factory.id.toString()}>
-                  {factory.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <>
+        <h2 className="text-xl font-semibold text-gray-800">Configure Machine</h2>
 
-        {/* Select Factory Section */}
-        {selectedFactoryId && (
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Select Factory Section</label>
-            <Select value={selectedFactorySectionId?.toString() || ""} onValueChange={handleFactorySectionChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue>{selectedFactorySectionId ? factorySections.find(s => s.id === selectedFactorySectionId)?.name : "Select Section"}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {factorySections.map((section) => (
-                  <SelectItem key={section.id} value={section.id.toString()}>
-                    {section.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+      <div className="flex items-center space-x-4 ">
+          {/* Factory Selection - Always a Dropdown */}
+        <Select 
+          value={selectedFactoryId?.toString() || ""} 
+          onValueChange={handleFactoryChange}
+        >
+          <SelectTrigger className="w-40">
+            <SelectValue>
+              {selectedFactoryId
+                ? factories.find((f) => f.id === selectedFactoryId)?.abbreviation
+                : "Select Factory"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {factories.map((factory) => (
+              <SelectItem key={factory.id} value={factory.id.toString()}>
+                {factory.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Factory Section Selection - Always a Dropdown */}
+        <Select 
+          value={selectedFactorySectionId?.toString() || ""} 
+          onValueChange={handleFactorySectionChange} 
+          disabled={!selectedFactoryId}
+        >
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Select Section" />
+          </SelectTrigger>
+          <SelectContent>
+            {factorySections.map((section) => (
+              <SelectItem key={section.id} value={section.id.toString()}>
+                {section.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        
+
+        </div>
 
         {/* Add New Machine */}
         {selectedFactorySectionId && (
           <>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Machine Name"
-                value={newMachineName}
-                onChange={(e) => setNewMachineName(e.target.value)}
-              />
-              <Button onClick={handleAddMachine}>Add</Button>
-            </div>
+           <AnimatePresence mode="wait">
+              {!isAddingMachine ? (
+                  <motion.div
+                  key="add-button"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 200 }}
+                  transition={{ duration: 0.2 }}
+                  className=""  // Ensures it does not affect layout
+
+                  >
+                  <Button 
+                      onClick={() => setIsAddingMachine(true)}
+                      className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
+                      >
+                      <PlusCircle size={18} />
+                      Add Machine
+                  </Button>
+                  </motion.div>
+              ) : (
+                  <div className="flex items-center gap-4">
+                  {/* Select Part */}
+                  <Input
+                      value={newMachineName}
+                      onChange={(e) => setNewMachineName((e.target.value))}
+                      className="w-20 text-center border rounded-md"
+                      min={1}
+                  />
+
+                  {/* Confirm (✔) Button */}
+                  <button 
+                      onClick={handleAddMachine}
+                      className="text-blue-600 hover:text-blue-800 flex items-center gap-1 px-2 py-1 rounded-md border border-blue-600 hover:bg-blue-100 transition"
+                  >
+                      <Check size={18} />
+                  </button>
+
+                  {/* Cancel (✖) Button */}
+                  <button 
+                      onClick={() => setIsAddingMachine(false)}
+                      className="text-red-600 hover:text-red-800 flex items-center gap-1 px-2 py-1 rounded-md border border-red-600 hover:bg-red-100 transition"
+                  >
+                      <XCircle size={18} />
+                  </button>
+                  </div>
+              )}
+              </AnimatePresence>
 
             {/* Scrollable Machine List */}
             <div className="max-h-64 overflow-y-auto border rounded-md">
@@ -236,8 +296,7 @@ const MachineManagementCard = () => {
             </div>
           </>
         )}
-       </div>
-    </div>
+       </>
   );
 };
 

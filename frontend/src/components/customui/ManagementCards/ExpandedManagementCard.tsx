@@ -4,6 +4,7 @@ import { ManagementType } from "@/types"; // Import the globally declared type
 import FactoryManagementCard from "@/components/customui/ManagementCards/FactoryManagementCard";
 import FactorySectionManagementCard from "./FactorySectionManagementCard";
 import MachineManagementCard from "./MachineManagementCard";
+import DepartmentManagementCard from "./DepartmentManagementCard";
 import { useSearchParams } from "react-router-dom";
 import MachinePartsManagementCard from "./MachinePartsManagementCard";
 
@@ -18,7 +19,7 @@ const managementCards: Record<ManagementType, JSX.Element> = {
   factorySections: <FactorySectionManagementCard />,
   machines: <MachineManagementCard />,
   machineParts: <MachinePartsManagementCard />, // Placeholder
-  departments: <div>Department Management</div>, // Placeholder
+  departments: <DepartmentManagementCard />, // Placeholder
 };
 
 const ExpandedManagementCard: React.FC<ExpandedManagementCardProps> = ({ type, onClose }) => {
@@ -29,11 +30,15 @@ const ExpandedManagementCard: React.FC<ExpandedManagementCardProps> = ({ type, o
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <Card className="bg-white w-full max-w-lg rounded-lg shadow-lg relative">
+      <Card className="bg-white w-full max-w-xl rounded-lg shadow-lg relative overflow-y-auto">
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black">
           <X size={20} />
         </button>
-        <CardContent>{managementCards[managementType]}</CardContent>
+        <CardContent>
+          <div className="w-full max-w-2xl p-6 space-y-6">
+            {managementCards[managementType]}
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

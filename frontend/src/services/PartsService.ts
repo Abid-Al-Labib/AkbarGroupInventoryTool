@@ -50,7 +50,7 @@ export const fetchAllParts = async () => {
         throw new Error(error.message);
     }
 
-    return { data };  // Returning data and count directly
+    return data as unknown as Part[];  // Returning data and count directly
 };
 
 

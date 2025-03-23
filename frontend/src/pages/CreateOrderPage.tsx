@@ -120,7 +120,7 @@ const CreateOrderPage = () => {
     useEffect(() => {
         const loadParts = async () => {
             const fetchedParts = await fetchAllParts();
-            setParts(fetchedParts.data);
+            setParts(fetchedParts);
         };
 
         loadParts();
@@ -453,7 +453,7 @@ const CreateOrderPage = () => {
         if (isPartsSelectOpen) {
             const loadParts = async () => {
                 const fetchedParts = await fetchAllParts();
-                setParts(fetchedParts.data);
+                setParts(fetchedParts);
             };
 
             loadParts(); // Refetch parts when the dropdown is opened
@@ -463,7 +463,7 @@ const CreateOrderPage = () => {
     const reloadParts = async () => {
         try {
             const fetchedParts = await fetchAllParts();
-            setParts(fetchedParts.data);
+            setParts(fetchedParts);
         } catch (error) {
             console.error("Failed to reload parts:", error);
             toast.error("Error loading parts");

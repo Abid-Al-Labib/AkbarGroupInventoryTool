@@ -80,6 +80,61 @@ export const fetchDepartments = async () => {
     return data;
 };
 
+export const addDepartment = async (name: string) => {
+    try {
+        const { error } = await supabase_client
+            .from('departments')
+            .insert([{ name }]);
+
+        if (error) {
+            console.error('Error adding department:', error.message);
+            throw new Error(error.message);
+        }
+
+        toast.success('Department added successfully.');
+    } catch (error) {
+        console.error(error);
+        toast.error('An error occurred while adding the department.');
+    }
+};
+
+export const deleteDepartment = async (departmentId: number) => {
+    try {
+        const { error } = await supabase_client
+            .from('departments')
+            .delete()
+            .eq('id', departmentId);
+
+        if (error) {
+            console.error('Error deleting department:', error.message);
+            throw new Error('Failed to delete department.');
+        }
+
+        toast.success('Department deleted successfully.');
+    } catch (error) {
+        console.error(error);
+        toast.error('An error occurred while deleting the department.');
+    }
+};
+
+export const updateDepartment = async (departmentId: number, newName: string) => {
+    try {
+        const { error } = await supabase_client
+            .from('departments')
+            .update({ name: newName })
+            .eq('id', departmentId);
+
+        if (error) {
+            console.error('Error updating department:', error.message);
+            throw new Error('Failed to update department.');
+        }
+
+        toast.success('Department updated successfully.');
+    } catch (error) {
+        console.error(error);
+        toast.error('An error occurred while updating the department.');
+    }
+};
 
 export const addFactory = async (name: string, abbreviation: string) => {
     const { data, error } = await supabase_client

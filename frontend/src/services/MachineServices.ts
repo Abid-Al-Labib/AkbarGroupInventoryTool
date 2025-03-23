@@ -256,3 +256,18 @@ export const deleteMachine = async (machineId: number) => {
     toast.success("Machine deleted successfully!");
     return true;
 };
+
+export const editMachineName = async (machineId: number, newName: string) => {
+    const { data, error } = await supabase_client
+        .from("machines")
+        .update({ name: newName })
+        .eq("id", machineId);
+
+    if (error) {
+        toast.error("Error updating machine name: " + error.message);
+        return null;
+    }
+
+    toast.success("Machine name updated successfully!");
+    return data;
+};

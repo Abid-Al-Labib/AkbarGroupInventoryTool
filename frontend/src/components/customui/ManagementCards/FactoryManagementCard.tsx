@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table";
 import { fetchFactories, addFactory, editFactory } from "@/services/FactoriesService";
 import { Factory } from "@/types";
-import { Pencil, Trash2, Factory as FactoryIcon } from "lucide-react";
+import { Pencil, Trash2, Factory as FactoryIcon, PlusCircle, X, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -58,57 +58,80 @@ const FactoryManagementCard = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl p-2">
+    <>
       <div className="max-h-[calc(100vh-100px)] overflow-y-auto p-4">
+      <h2 className="text-xl font-semibold text-gray-800">Configure Factories</h2>
+
       <div className="space-y-4">
         {/* Add Factory Button (Expands on Click) */}
         <div className="rounded-lg p-4 shadow-sm">
         <AnimatePresence mode="wait">
             {!isAdding ? (
-                <motion.div
+              <motion.div
                 key="add-button"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.1 }}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 200 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Button
+                  onClick={() => setIsAdding(true)}
+                  className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 w-40 justify-center"
                 >
-                <Button className="w-full" onClick={() => setIsAdding(true)}>
-                    Add Factory
+                  <PlusCircle size={18} />
+                  Add Factory
                 </Button>
-                </motion.div>
+              </motion.div>
             ) : (
-                <motion.div
+              <motion.div
                 key="add-form"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.1 }}
-                className="flex flex-col gap-2"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -200 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-4"
+              >
+                {/* Factory Name Input */}
+                <Input
+                  className="w-[260px]"
+                  placeholder="Enter factory name"
+                  value={newFactoryName}
+                  onChange={(e) => setNewFactoryName(e.target.value)}
+                />
+
+                {/* Abbreviation Input */}
+                <Input
+                  className="w-[160px]"
+                  placeholder="Abbreviation"
+                  value={newFactoryAbbreviation}
+                  onChange={(e) => setNewFactoryAbbreviation(e.target.value)}
+                />
+
+                {/* Confirm Add */}
+                <button
+                  onClick={() => {
+                    handleAddFactory();
+                    setIsAdding(false); // Close after adding
+                  }}
+                  className="text-blue-600 hover:text-blue-800 flex items-center gap-1 px-2 py-1 rounded-md border border-blue-600 hover:bg-blue-100 transition"
                 >
-                {/* The inputs after clicking Add Factory */}
-                <div className="flex gap-2">
-                    <Input
-                    className="flex-grow"
-                    placeholder="Enter factory name"
-                    value={newFactoryName}
-                    onChange={(e) => setNewFactoryName(e.target.value)}
-                    />
-                    <Input
-                    className="w-32"
-                    placeholder="Abbreviation"
-                    value={newFactoryAbbreviation}
-                    onChange={(e) => setNewFactoryAbbreviation(e.target.value)}
-                    />
-                </div>
-                <div className="flex justify-end gap-2">
-                    <Button variant="secondary" onClick={() => setIsAdding(false)}>
-                    Cancel
-                    </Button>
-                    <Button onClick={handleAddFactory}>Add</Button>
-                </div>
-                </motion.div>
+                  <Plus size={18} />
+                </button>
+
+                {/* Cancel */}
+                <button
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewFactoryName("");
+                    setNewFactoryAbbreviation("");
+                  }}
+                  className="text-red-600 hover:text-red-800 flex items-center gap-1 px-2 py-1 rounded-md border border-red-600 hover:bg-red-100 transition"
+                >
+                  <X size={18} />
+                </button>
+              </motion.div>
             )}
-            </AnimatePresence>
+          </AnimatePresence>
         </div>
 
         {/* Factory List Table */}
@@ -162,7 +185,7 @@ const FactoryManagementCard = () => {
         </div>
       </div>
       </div>
-    </div>
+    </>
   );
 };
 
