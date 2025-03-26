@@ -28,7 +28,13 @@ interface Machine {
     factory_section_id: number;
 }
 
-const AllMachinesStatus = () => {
+interface AllMachinesStatusProps {
+    factoryId?: number;
+    factorySectionId?: number;
+    handleRowSelection?: (factoryId: number, factorySectionId: number, machineId: number) => void;
+}
+
+const AllMachinesStatus = ({ factoryId, factorySectionId, handleRowSelection }: AllMachinesStatusProps) => {
     const [factories, setFactories] = useState<Factory[]>([]);
     const [factorySections, setFactorySections] = useState<FactorySection[]>([]);
     const [machines, setMachines] = useState<Machine[]>([]);
@@ -64,67 +70,131 @@ const AllMachinesStatus = () => {
         );
     }
 
+    // If no factory is selected, show a message
+    if (factoryId === undefined) {
+        return (
+            <Card className="mt-5">
+                <CardHeader>
+                    <CardTitle>Machine Status Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex justify-center items-center h-32 text-muted-foreground">
+                        Please select a factory to view machine status
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    // Filter machines based on factoryId and factorySectionId
+    const filteredMachines = machines.filter(machine => {
+        if (factoryId !== undefined) {
+            const section = factorySections.find(s => s.id === machine.factory_section_id);
+            if (!section || section.factory_id !== factoryId) return false;
+        }
+        if (factorySectionId !== undefined && machine.factory_section_id !== factorySectionId) {
+            return false;
+        }
+        return true;
+    });
+
+    // Group machines by factory and section
+    const groupedMachines = filteredMachines.reduce((acc, machine) => {
+        const section = factorySections.find(s => s.id === machine.factory_section_id);
+        const factory = factories.find(f => f.id === section?.factory_id);
+        
+        if (!factory || !section) return acc;
+        
+        const key = `${factory.id}-${section.id}`;
+        if (!acc[key]) {
+            acc[key] = {
+                factory: factory.name,
+                section: section.name,
+                machines: []
+            };
+        }
+        acc[key].machines.push(machine);
+        return acc;
+    }, {} as Record<string, { factory: string; section: string; machines: Machine[] }>);
+
+    // Sort machines in each group
+    Object.values(groupedMachines).forEach(group => {
+        group.machines.sort((a, b) => 
+            a.name.localeCompare(b.name, undefined, {
+                numeric: true,
+                sensitivity: 'base'
+            })
+        );
+    });
+
     return (
-        <Accordion type="multiple" className="w-full">
-            {factories.map((factory) => {
-                const factorySectionsForFactory = factorySections.filter(
-                    (section) => section.factory_id === factory.id
-                );
+        <Card className="mt-5">
+            <CardHeader>
+                <CardTitle>Machine Status Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Factory</TableHead>
+                            <TableHead>Section</TableHead>
+                            <TableHead>Machines</TableHead>
+                            <TableHead>Running Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {Object.entries(groupedMachines).map(([key, group]) => {
+                            const [factoryId, sectionId] = key.split('-').map(Number);
+                            const runningCount = group.machines.filter(m => m.is_running).length;
+                            const totalCount = group.machines.length;
 
-                return (
-                    <AccordionItem key={factory.id} value={`factory-${factory.id}`}>
-                        <AccordionTrigger>
-                            <CardTitle>{factory.name}</CardTitle>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            {factorySectionsForFactory.map((section) => {
-                                const sectionMachines = machines
-                                    .filter((machine) => machine.factory_section_id === section.id)
-                                    .sort((a, b) =>
-                                        a.name.localeCompare(b.name, undefined, {
-                                            numeric: true,
-                                            sensitivity: "base",
-                                        })
-                                    );
-
-                                const runningCount = sectionMachines.filter((m) => m.is_running).length;
-
-                                return (
-                                    <AccordionItem
-                                        key={section.id}
-                                        value={`section-${section.id}`}
-                                        className="pl-4"
-                                    >
-                                        <AccordionTrigger>
-                                            {section.name} - {runningCount}/{sectionMachines.length} Running
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <div className="flex flex-wrap gap-2">
-                                                {sectionMachines.map((machine, index) => (
-                                                    <span key={machine.id} className="inline-flex items-center">
-                                                        <Badge
-                                                            variant="secondary"
-                                                            className={`text-sm ${machine.is_running
-                                                                    ? "bg-green-100 text-green-600"
-                                                                    : "bg-red-100 text-red-600"
-                                                                }`}
-                                                        >
-                                                            {machine.name}
-                                                        </Badge>
-                                                        {index < sectionMachines.length - 1 && <span>,</span>}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                );
-                            })}
-                        </AccordionContent>
-                    </AccordionItem>
-                );
-            })}
-        </Accordion>
-
+                            return (
+                                <TableRow 
+                                    key={key}
+                                    className="cursor-default"
+                                >
+                                    <TableCell>{group.factory}</TableCell>
+                                    <TableCell>{group.section}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-wrap gap-2">
+                                            {group.machines.map((machine, index) => (
+                                                <Badge
+                                                    key={machine.id}
+                                                    variant="secondary"
+                                                    className={`text-sm cursor-pointer ${
+                                                        machine.is_running
+                                                            ? "bg-green-100 text-green-600"
+                                                            : "bg-red-100 text-red-600"
+                                                    }`}
+                                                    onClick={() => handleRowSelection?.(factoryId, sectionId, machine.id)}
+                                                >
+                                                    {machine.name}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge
+                                            variant="secondary"
+                                            className={`${
+                                                runningCount === totalCount
+                                                    ? "bg-green-100 text-green-600"
+                                                    : runningCount === 0
+                                                    ? "bg-red-100 text-red-600"
+                                                    : "bg-orange-100 text-orange-600"
+                                            }`}
+                                        >
+                                            {runningCount}/{totalCount} Running
+                                        </Badge>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     );
 };
+
 export default AllMachinesStatus;

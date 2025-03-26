@@ -15,7 +15,7 @@ import { Machine, Order } from "@/types";
 import MachineStatus from "@/components/customui/MachineStatus";
 import { fetchRunningOrdersByMachineId } from "@/services/OrdersService";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AllMachinesStatus from "@/components/customui/AllMachineStatus";
 
@@ -231,15 +231,14 @@ const MachinePartsPage = () => {
   return (
     <>
       <NavigationBar />
-      <div className="flex min-h-screen w-full flex-col bg-muted/40 ">
+      <div className="flex w-full flex-col bg-muted/40">
         <main className="mt-2 p-4 sm:px-6 sm:py-0">
           {/* Container for selections, running orders, and machine status */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch gap-4 h-full">
 
             {/* Selections Section */}
             <div className="flex-none min-w-72 max-w-96 w-1/6"> {/* Roughly 1/6th of the width */}
-
-              <Card className="mb-4">
+              <Card className="mb-4 h-full">
                 <CardHeader>
                   <CardTitle>Machine Details</CardTitle>
                 </CardHeader>
@@ -277,7 +276,7 @@ const MachinePartsPage = () => {
                   </div>
 
                   {/* Factory Section Selection Dropdown */}
-                  {selectedFactoryId !== undefined && (
+                 
                     <div className="mb-4">
                       <Label className="mb-2">Select Factory Section</Label>
                       <Select
@@ -306,10 +305,10 @@ const MachinePartsPage = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                  )}
+                  
 
                   {/* Machine Selection Dropdown */}
-                  {selectedFactorySectionId !== undefined && (
+                  
                     <div className="mb-4">
                       <Label className="mb-2">Select Machine</Label>
                       <Select
@@ -334,7 +333,7 @@ const MachinePartsPage = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                  )}
+                
                   {/* Reset Button */}
                   <Button
                     className="mt-4"
@@ -356,78 +355,106 @@ const MachinePartsPage = () => {
             </div>
             
             {/* Running Orders Section */}
-            <div className="flex-1 w-4/6"> {/* Roughly 4/6th of the width */}
-              {runningOrders.length > 0 && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="font-semibold text-2xl mb-2">Running Orders</h3>
-                  <div className="max-h-64 overflow-y-auto">
-                    <Table>
-                      <TableCaption>A list of current running orders.</TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Order ID</TableHead>
-                          <TableHead>Created At</TableHead>
-                          <TableHead>Order Note</TableHead>
-                          <TableHead>Status</TableHead>
-                          
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {runningOrders.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell>
-                              <Badge variant="secondary" className="bg-blue-100">
-                                <Link to={`/vieworder/${order.id}`}>{order.id}</Link>
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                            <TableCell>{order.order_note}</TableCell>
-                            <TableCell>
-                              <Badge
-                                className={
-                                  order.statuses.name === "Parts Received"
-                                    ? "bg-green-100"
-                                    : order.statuses.name === "Pending"
-                                      ? "bg-red-100"
-                                      : "bg-orange-100"
-                                }
-                                variant="secondary"
-                              >
-                                {order.statuses.name}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              )}
+            <div className="flex-1"> {/* Roughly 4/6th of the width */}
+                <Card className="mb-4 h-full">
+                    <CardHeader>
+                        <CardTitle>Running Orders</CardTitle>
+                        <CardDescription>A list of current running orders.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {selectedMachineId === undefined || runningOrders.length === 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[100px]">Order ID</TableHead>
+                                        <TableHead className="w-[100px]">Req #</TableHead>
+                                        <TableHead className="w-[120px]">Created At</TableHead>
+                                        <TableHead>Order Note</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-[250px] text-muted-foreground">
+                                            {selectedMachineId === undefined ? "Select a machine to view orders" : "No running orders for this machine"}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <div className="h-[293px] overflow-y-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[100px]">Order ID</TableHead>
+                                            <TableHead className="w-[100px]">Req #</TableHead>
+                                            <TableHead className="w-[120px]">Created At</TableHead>
+                                            <TableHead>Order Note</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {runningOrders.map((order) => (
+                                            <TableRow key={order.id}>
+                                                <TableCell>
+                                                    <Badge variant="secondary" className="bg-blue-100">
+                                                        <Link to={`/vieworder/${order.id}`}>{order.id}</Link>
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>{order.req_num}</TableCell>
+                                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                                                <TableCell className="max-w-[200px] truncate" title={order.order_note}>
+                                                    {order.order_note}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge
+                                                        className={
+                                                            order.statuses.name === "Parts Received"
+                                                                ? "bg-green-100"
+                                                                : order.statuses.name === "Pending"
+                                                                    ? "bg-red-100"
+                                                                    : "bg-orange-100"
+                                                        }
+                                                        variant="secondary"
+                                                    >
+                                                        {order.statuses.name}
+                                                    </Badge>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
-
-            {/* Machine Status Section */}
-            {
-              ((selectedFactoryId !== undefined)&&(selectedFactorySectionId !==undefined)&&(selectedMachineId !== undefined) )? (
-            <div className="flex min-w-44 max-w-lg"> {/* Roughly 1/6th of the width */}
-              <MachineStatus machineId={selectedMachineId} />
-            </div>
-              ): null
-            }
           </div>
 
           {
             selectedFactoryId === undefined ? (
-              <AllMachinesStatus handleRowSelection={handleRowSelection} />
+              <div className="mt-3">
+                <Card className="min-h-[350px]">
+                  <CardHeader>
+                    <CardTitle>Machine Status Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-center items-center h-32 text-muted-foreground">
+                      Please select a factory to view machine status
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             ): selectedFactorySectionId === undefined ? (
                 <AllMachinesStatus
                   factoryId={selectedFactoryId}
-                  handleRowSelection={handleRowSelection} // Pass the function to handle row selection
+                  handleRowSelection={handleRowSelection}
                 />
             ): selectedMachineId === undefined ? (
                 <AllMachinesStatus
                   factoryId={selectedFactoryId}
                   factorySectionId={selectedFactorySectionId}
-                  handleRowSelection={handleRowSelection} // Pass the function to handle row selection
+                  handleRowSelection={handleRowSelection}
                 />         
             ) : (
             <MachinePartsTable
@@ -435,6 +462,7 @@ const MachinePartsPage = () => {
               onApplyFilters={setFilters}
               onResetFilters={() => setFilters({})}
               onRefresh={refreshComponents}
+              selectedMachine={selectedMachine}
             />
           )}
         </main>
