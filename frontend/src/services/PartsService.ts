@@ -42,6 +42,19 @@ export const fetchPageParts = async ({
     return { data, count }; //  Returning data and count
 };
 
+export const searchPartsByName = async (nameQuery: string) => {
+  const { data, error } = await supabase_client
+    .from('parts')
+    .select('id, name, unit')
+    .ilike('name', `%${nameQuery}%`)
+    .order('name');
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as Part[];
+};
 
 export const fetchAllParts = async () => {
     const { data, error } = await supabase_client.from('parts').select('*');
@@ -101,6 +114,7 @@ export const fetchPartByID = async (part_id: number)=> {
     console.log(data)
     return data as Part[]
 }
+
 
 export const fetchPartsByIDs = async (part_ids: number[])=> {
     const { data, error } = await supabase_client
