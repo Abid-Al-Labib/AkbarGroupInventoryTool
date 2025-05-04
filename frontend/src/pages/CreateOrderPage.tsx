@@ -11,11 +11,13 @@ import ReactSelect from 'react-select'
 import { fetchOrderByReqNumandFactory, insertOrder, insertOrderStorage } from "@/services/OrdersService";
 
 import toast from 'react-hot-toast'
+import AsyncSelect from 'react-select/async';
+
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { fetchFactories, fetchFactorySections, fetchDepartments } from '@/services/FactoriesService';
 import { fetchAllMachines, setMachineIsRunningById } from "@/services/MachineServices"
 import { insertOrderedParts } from '@/services/OrderedPartsService';
-import { fetchAllParts } from "@/services/PartsService"
+import { fetchAllParts, fetchPartByID, searchPartsByName } from "@/services/PartsService"
 import { Part } from "@/types"
 import { InsertStatusTracker } from "@/services/StatusTrackerService"
 import { fetchStoragePartQuantityByFactoryID } from "@/services/StorageService"
@@ -65,6 +67,7 @@ interface InputOrderedPart {
     unit: string | null;
     order_id: number;
     part_id: number;
+    part_name: string;
     factory_id: number;
     machine_id: number;
     factory_section_id: number;
@@ -138,6 +141,7 @@ const CreateOrderPage = () => {
     // Order Parts
     const [qty, setQty] = useState<number>(-1);
     const [partId, setPartId] = useState<number>(-1);
+    const [partName, setPartName] = useState<string>('');
     const [isSampleSentToOffice, setIsSampleSentToOffice] = useState<boolean>();
 
     const [forceRender, setForceRender] = useState<number>(0);
@@ -238,6 +242,9 @@ const CreateOrderPage = () => {
 
         const storage_data = await fetchStoragePartQuantityByFactoryID(partId, selectedFactoryId)
 
+
+        
+
         if (orderType === "Machine" && storage_data.length > 0 && storage_data[0].qty > 0) {
 
             const newOrderedPart: InputOrderedPart = {
@@ -245,6 +252,7 @@ const CreateOrderPage = () => {
                 unit: "",
                 order_id: 0, // Will be set when the order is created
                 part_id: partId,
+                part_name: partName,
                 factory_id: selectedFactoryId,
                 machine_id: selectedMachineId,
                 factory_section_id: selectedFactorySectionId,
@@ -264,6 +272,7 @@ const CreateOrderPage = () => {
                 unit: "",
                 order_id: 0, // Will be set when the order is created
                 part_id: partId,
+                part_name: partName,
                 factory_id: selectedFactoryId,
                 machine_id: selectedMachineId,
                 factory_section_id: selectedFactorySectionId,
@@ -470,15 +479,21 @@ const CreateOrderPage = () => {
         }
     };
 
-    const handleSelectPart = (value: number) => {
-        if (partId === value) {
-            setPartId(-1); // Temporarily clear the selection
-            setTimeout(() => {
-                setPartId(value);
-                setForcePartRender(prev => prev + 1); // Force re-render to reset the dropdown
-            }, 0);
-        } else {
-            setPartId(value);
+    const handleSelectPart = (value: Part | undefined) => {
+        if(value){
+
+            if (partId === value?.id) {
+                setPartId(-1); // Temporarily clear the selection
+                setPartName("")
+                setTimeout(() => {
+                    setPartId(value.id);
+                    setPartName(value.name)
+                    setForcePartRender(prev => prev + 1); // Force re-render to reset the dropdown
+                }, 0);
+            } else {
+                setPartId(value.id);
+                setPartName(value.name)
+            }
         }
     };
 
@@ -701,29 +716,40 @@ const CreateOrderPage = () => {
                                     <div className="space-y-4">
                                         <div className="mt-2">
                                             <Label htmlFor="partId">Select Part</Label>
-                                            <ReactSelect
+                                            <AsyncSelect
                                                 id="partId"
-                                                options={parts
-                                                    .filter((part) =>
-                                                        part.name.toLowerCase().includes(searchQueryParts.toLowerCase())
-                                                    )
-                                                    .sort((a, b) => a.name.localeCompare(b.name)) // Sort parts alphabetically
-                                                    .map((part) => ({
-                                                        value: part.id,
+                                                cacheOptions
+                                                defaultOptions
+                                                loadOptions={async (inputValue: string) => {
+                                                    try {
+                                                    const response = await searchPartsByName(inputValue); // modify this function to accept a search query
+                                                    const fetchedParts = response;
+
+                                                    return fetchedParts
+                                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                                        .map((part) => ({
+                                                        value: part,
                                                         label: `${part.name} (${part.unit || 'units'})`,
-                                                        isDisabled: orderedParts.some((p) => p.part_id === part.id), // Disable parts already added
-                                                    }))}
-                                                onChange={(selectedOption) =>
-                                                    handleSelectPart(Number(selectedOption?.value))
-
-                                                }
-                                                onMenuOpen={reloadParts}
-                                                isSearchable
+                                                        isDisabled: orderedParts.some((p) => p.part_id === part.id),
+                                                        }));
+                                                    } catch (error) {
+                                                    console.error("Error fetching parts:", error);
+                                                    return [];
+                                                    }
+                                                }}
+                                                onChange={(selectedOption) => handleSelectPart((selectedOption?.value))}
                                                 placeholder="Search or Select a Part"
-                                                value={partId > 0 ? { value: partId, label: parts.find(p => p.id === partId)?.name } : null}
+                                                // value={
+                                                //     partId > 0
+                                                //     ? {
+                                                //         value: partId,
+                                                //         label: parts.find((p) => p.id === partId)?.name || 'Selected Part',
+                                                //         }
+                                                //     : null
+                                                // }
                                                 className="w-[260px]"
-
-                                            />
+                                                isSearchable
+                                                />
                                             {/* Optional Create New Part Button */}
                                             {addPartEnabled && (
                                                 <div className="mt-2">
@@ -816,7 +842,7 @@ const CreateOrderPage = () => {
 
                                                     {/* Flex container to align Part and Quantity side by side */}
                                                     <div className="flex justify-between items-center ml-2 mr-2 mt-4 mb-4">
-                                                        <p><strong>Part:</strong> {parts.find(p => p.id === part.part_id)?.name || "Unknown"}</p>
+                                                        <p><strong>Part:</strong> { part.part_name || "Unknown" }</p>
                                                         <div className="flex items-center ml-auto">
                                                             <p><strong>Quantity:</strong> {part.qty}</p>
                                                             <div
