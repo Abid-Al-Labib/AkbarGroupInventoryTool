@@ -336,8 +336,12 @@ const CreateOrderPage = () => {
                 const orderId = orderResponse.data[0].id;
                 // toast.success(`Order created with ID: ${orderId}, now adding parts...`);
 
-                const partPromises = orderedParts.map(part =>
-                    insertOrderedParts(
+
+                
+
+                for (const part of orderedParts) {
+                    try {
+                        await insertOrderedParts(
                         part.qty,
                         orderId,
                         part.part_id,
@@ -345,10 +349,21 @@ const CreateOrderPage = () => {
                         part.note || null,
                         part.in_storage,
                         part.approved_storage_withdrawal
-                    )
-                );
+                        );
+                        // Optional: Log or toast success for each part if needed
+                        // console.log(`Successfully added part: ${part.part_id}`);
+                    } catch (error) {
+                        // Handle errors for individual part insertions
+                        console.error(`Failed to add part: ${part.part_id}`, error);
+                        // Depending on your needs, you might want to stop processing
+                        // or collect errors and report them at the end.
+                        // For now, we'll re-throw to stop the process on the first error.
+                        throw new Error(`Failed during part insertion: ${error}`);
+                    }
+                    }
 
-                await Promise.all(partPromises);
+
+                // await Promise.all(partPromises);
                 // toast.success("All parts added successfully!");
 
                 setShowPartForm(false);
