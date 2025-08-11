@@ -81,6 +81,18 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
   // useEffect to fetch most recent cost and purchase date
   useEffect(() => {
       const fetchData = async () => {
+          const past_purchase_result = await fetchLastCostAndPurchaseDate(orderedPartInfo.part_id);
+          if (past_purchase_result) {
+              setLastUnitCost(past_purchase_result.unit_cost);
+              setLastPurchaseDate(past_purchase_result.part_purchase_date);
+              setLastVendor(past_purchase_result.vendor)
+            }
+          else{
+            setLastUnitCost(null);
+            setLastPurchaseDate(null);
+            setLastVendor(null);
+          }
+
           if (mode=="manage")
           {
             const disableRow = orderedPartInfo.in_storage && orderedPartInfo.approved_storage_withdrawal && orderedPartInfo.qty===0
@@ -96,24 +108,14 @@ export const OrderedPartRow:React.FC<OrderedPartRowProp> = ({index, mode, ordere
               }
             }
           }
-          if(order_type == "Machine"){
-            const past_purchase_result = await fetchLastCostAndPurchaseDate(orderedPartInfo.part_id);
-            const last_change_result = await fetchLastChangeDate(machine_id,orderedPartInfo.part_id);
-              if (past_purchase_result) {
-              setLastUnitCost(past_purchase_result.unit_cost);
-              setLastPurchaseDate(past_purchase_result.part_purchase_date);
-              setLastVendor(past_purchase_result.vendor)
-            }
 
+          if(order_type == "Machine"){
+            const last_change_result = await fetchLastChangeDate(machine_id,orderedPartInfo.part_id);
             if (last_change_result) {
               setLastChangeDate(last_change_result)
             }
           }
-          else{
-            setLastUnitCost(null);
-            setLastPurchaseDate(null);
-            setLastVendor(null);
-          }
+
       };
 
       fetchData(); // Trigger the fetch when component mounts or dependencies change
