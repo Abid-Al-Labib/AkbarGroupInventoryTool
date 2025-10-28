@@ -200,7 +200,7 @@ const OrdersTableRow: React.FC<OrdersTableRowProps> = ({ order }) => {
               </Link>
             }
             {
-              profile?.permission==='admin' && 
+              profile?.permission==='admin' && profile?.position==='Director Operations' && 
               <DropdownMenuItem onClick={()=>setIsDeleteDialogOpen(true)}>
                 <span className='hover:text-red-600'>Delete</span>
               </DropdownMenuItem>
