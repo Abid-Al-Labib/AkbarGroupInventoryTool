@@ -94,32 +94,41 @@ export const upsertStoragePart = async (part_id: number, factory_id: number, qua
 // }
 
 export const updateStoragePartQty = async (part_id: number, factory_id: number, quantity: number, type: 'add'|'subtract') => {
+    console.group("[StorageService] updateStoragePartQty");
+    console.log("Input payload", { part_id, factory_id, quantity, type });
 
     const { data: currentData, error } = await supabase_client
         .from('storage_parts')
         .select('qty')
         .eq('part_id', part_id).eq('factory_id', factory_id)
+    console.log("Select result", { currentData, selectError: error });
+    if (error) {
+        toast.error(error.message)
+        console.groupEnd();
+        return;
+    }
 
     let updatedQuantity = 0
+    const currentQty = currentData?.[0]?.qty ?? 0;
     
     if (type === 'add') {
-        if (currentData){
-            updatedQuantity = currentData[0].qty+quantity;
-        }
-        else updatedQuantity = updatedQuantity + quantity
+        console.log("Branch: add", { currentDataIsTruthy: !!currentData, firstRow: currentData?.[0] });
+        updatedQuantity = currentQty + quantity;
     }
     else 
     {
-        if(currentData){
-            if (currentData[0].qty>=quantity){
-                updatedQuantity = currentData[0].qty - quantity;
-            }
-        } 
+        console.log("Branch: subtract", { currentDataIsTruthy: !!currentData, firstRow: currentData?.[0] });
+        if (currentQty >= quantity){
+            updatedQuantity = currentQty - quantity;
+        } else {
+            updatedQuantity = 0;
+        }
     }
+    console.log("Computed updatedQuantity", { updatedQuantity });
     
 
     
-    const {  } = await supabase_client
+    const { error: upsertError } = await supabase_client
     .from('storage_parts')
     .upsert({
         part_id: part_id,
@@ -127,10 +136,12 @@ export const updateStoragePartQty = async (part_id: number, factory_id: number, 
         qty: updatedQuantity
     }, { onConflict: 'part_id, factory_id' }
     )
+    console.log("Upsert result", { upsertError });
 
-    if (error) {
-        toast.error(error.message)
+    if (upsertError) {
+        toast.error(upsertError.message)
     }   
+    console.groupEnd();
 
 }
 

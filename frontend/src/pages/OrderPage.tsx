@@ -118,23 +118,25 @@ const OrderPage = () => {
 
     useEffect(() => {
         const channel = supabase_client
-        .channel('order-changes')
-        .on(
-            'postgres_changes',
-            {
-            event: '*',
-            schema: 'public',
-            table: 'orders'
-            },
-            () => {
-                console.log("Changes detected, processing realtime")
-                fetchOrdersForPage();
-            }
-        )
-        .subscribe()
-        // fetchOrdersForPage(currentPage);
-        
-    }, [currentPage]);
+            .channel("order-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "orders",
+                },
+                () => {
+                    console.log("Changes detected, processing realtime");
+                    fetchOrdersForPage();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase_client.removeChannel(channel);
+        };
+    }, [currentPage, filters, showCompleted]);
 
     return (
         <>

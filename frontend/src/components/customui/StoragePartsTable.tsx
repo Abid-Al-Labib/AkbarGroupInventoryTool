@@ -2,6 +2,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '.
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import SearchAndFilter from "@/components/customui/SearchAndFilter";
 import StoragePartsRow from './StoragePartsRow';
+import { Button } from '../ui/button';
 
 type StoragePart = {
     storageId: number;
@@ -17,9 +18,12 @@ interface StoragePartsTableProps {
     parts: StoragePart[];
     onApplyFilters: (filters: any) => void;
     onResetFilters: () => void;
+    canManage: boolean;
+    onPartUpdated: () => Promise<void>;
+    onOpenAddDialog: () => void;
 }
 
-const StoragePartsTable: React.FC<StoragePartsTableProps> = ({ parts, onApplyFilters, onResetFilters }) => {
+const StoragePartsTable: React.FC<StoragePartsTableProps> = ({ parts, onApplyFilters, onResetFilters, canManage, onPartUpdated, onOpenAddDialog }) => {
     return (
     
         <Card className="mt-5">
@@ -28,7 +32,7 @@ const StoragePartsTable: React.FC<StoragePartsTableProps> = ({ parts, onApplyFil
                 <CardDescription>
                     This is a list of storage orders.
                 </CardDescription>
-                <div className="ml-auto">   
+                <div className="ml-auto flex items-center gap-2">   
                     <SearchAndFilter
                         filterConfig={[
                             // { type: 'factory', label: 'Factory' },
@@ -40,6 +44,11 @@ const StoragePartsTable: React.FC<StoragePartsTableProps> = ({ parts, onApplyFil
                         onResetFilters={onResetFilters}
                         hideDefaultIdDateSearch={true}
                     />
+                    {canManage && (
+                        <Button onClick={onOpenAddDialog} className="bg-blue-700 hover:bg-blue-800">
+                            Instant Add Part
+                        </Button>
+                    )}
                 </div>
             </CardHeader>
             <CardContent>
@@ -55,7 +64,7 @@ const StoragePartsTable: React.FC<StoragePartsTableProps> = ({ parts, onApplyFil
                     </TableHeader>
                     <TableBody>
                         {parts.map((part) => (
-                            <StoragePartsRow key={part.id} part={part} />
+                            <StoragePartsRow key={`${part.id}-${part.factory_id}`} part={part} canManage={canManage} onPartUpdated={onPartUpdated} />
                         ))}
                     </TableBody>
                 </Table>

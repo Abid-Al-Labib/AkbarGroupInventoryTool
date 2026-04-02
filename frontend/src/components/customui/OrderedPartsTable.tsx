@@ -364,7 +364,11 @@ const handleOrderManagement = async () => {
         table: 'order_parts'
         },handleChanges
     )
-    .subscribe()
+    .subscribe();
+
+    return () => {
+      supabase_client.removeChannel(channel);
+    };
   },[])
 
   useEffect(()=>{
