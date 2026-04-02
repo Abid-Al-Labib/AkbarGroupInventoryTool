@@ -91,8 +91,11 @@ const ManageOrderPage = () => {
                 loadOrder();
             }
         )
-        .subscribe()  
+        .subscribe();
 
+    return () => {
+      supabase_client.removeChannel(channel);
+    };
   }, [id, navigate]);
   
   useEffect(() => { 

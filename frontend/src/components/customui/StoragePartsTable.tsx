@@ -46,7 +46,7 @@ const StoragePartsTable: React.FC<StoragePartsTableProps> = ({ parts, onApplyFil
                     />
                     {canManage && (
                         <Button onClick={onOpenAddDialog} className="bg-blue-700 hover:bg-blue-800">
-                            Add Part to Storage
+                            Instant Add Part
                         </Button>
                     )}
                 </div>
