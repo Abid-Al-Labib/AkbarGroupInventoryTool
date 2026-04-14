@@ -389,7 +389,7 @@ const handleOrderManagement = async () => {
       <CardHeader>
           <CardTitle>Parts Ordered</CardTitle>
           <CardDescription>
-          <p>This is a list of parts that were ordered.</p>
+            This is a list of parts that were ordered.
           </CardDescription>
       </CardHeader>
       {(loadingTable===true)? (

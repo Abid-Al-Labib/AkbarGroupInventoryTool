@@ -41,23 +41,28 @@ const ViewOrderPage = () => {
   };
 
   useEffect(() => {
-      const channel = supabase_client
+    const channel = supabase_client
       .channel('order-changes')
       .on(
-          'postgres_changes',
-          {
+        'postgres_changes',
+        {
           event: '*',
           schema: 'public',
-          table: 'orders'
-          },
-          () => {
-              console.log("Changes detect, processing realtime")
-              loadOrders();
-          }
+          table: 'orders',
+        },
+        () => {
+          console.log("Changes detect, processing realtime");
+          loadOrders();
+        }
       )
-      .subscribe()
+      .subscribe();
+
     loadOrders();
-  }, [id, navigate,supabase_client]);
+
+    return () => {
+      supabase_client.removeChannel(channel);
+    };
+  }, [id, navigate]);
 
   
   const CreateInvoice = () => {

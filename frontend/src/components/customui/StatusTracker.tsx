@@ -22,24 +22,29 @@ const StatusTracker: React.FC<StatusTrackerProp> = ({order_id}) => {
       const merged = mergeStatusWithTracker(allStatuses,statusTracker);
       setMergedStatuses(merged);
     };
-    useEffect(()=>{
+    useEffect(() => {
       const channel = supabase_client
-      .channel('status_tracker-changes')
-      .on(
+        .channel('status_tracker-changes')
+        .on(
           'postgres_changes',
           {
-          event: '*',
-          schema: 'public',
-          table: 'status_tracker'
+            event: '*',
+            schema: 'public',
+            table: 'status_tracker',
           },
           () => {
-              console.log("Changes detect, processing realtime")
-              fetchData();
+            console.log("Changes detect, processing realtime");
+            fetchData();
           }
-      )
-      .subscribe()
+        )
+        .subscribe();
+
       fetchData();
-    },[supabase_client]);
+
+      return () => {
+        supabase_client.removeChannel(channel);
+      };
+    }, [order_id]);
 
     return (
     <Card className="overflow-hidden overflow-y-scroll h-[60vh]" x-chunk="dashboard-05-chunk-4">
